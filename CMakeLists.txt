@@ -8,8 +8,8 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
-  message_filters
   lipm_msgs
+  actionlib
 )
 find_package(Eigen3)
 find_package(Boost REQUIRED)
@@ -18,7 +18,7 @@ find_package(Boost REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lipm_control
-  CATKIN_DEPENDS geometry_msgs roscpp message_filters lipm_msgs message_runtime message_generation
+  CATKIN_DEPENDS geometry_msgs roscpp lipm_msgs actionlib  
   DEPENDS Eigen3
 )
 

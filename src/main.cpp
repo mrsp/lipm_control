@@ -6,6 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     control* lc;
     lc = new control(nh);
+    lc->run();
     ros::spin();
     delete lc;
     return 0;

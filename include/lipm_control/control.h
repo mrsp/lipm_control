@@ -2,18 +2,12 @@
 #define __LIPMCONTROL_H__
 #include <ros/ros.h>
 #include <iostream>
-#include <lipm_msgs/TrajectoryPoints.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
 #include <eigen3/Eigen/Dense>
+#include <lipm_msgs/TrajectoryPoints.h>
+#include <lipm_msgs/MotionControlAction.h>
+#include <actionlib/server/simple_action_server.h>
 
-using namespace message_filters;
 using namespace Eigen;
-
-typedef message_filters::sync_policies::ApproximateTime<lipm_msgs::TrajectoryPoints, lipm_msgs::TrajectoryPoints, lipm_msgs::TrajectoryPoints, 
-lipm_msgs::TrajectoryPoints, lipm_msgs::TrajectoryPoints> syncPolicy;
 
 
 class control
@@ -24,16 +18,16 @@ private:
     double freq;
     int trajectorySize, i;
     bool desiredTrajectoryAvailable;
-    message_filters::Synchronizer<syncPolicy> *ts_sync;
     Quaterniond q;
     lipm_msgs::TrajectoryPoints CoMTrajectory, VRPTrajectory, DCMTrajectory, LLegTrajectory, RLegTrajectory;
+    lipm_msgs::MotionControlResult result_;
+    lipm_msgs::MotionControlFeedback feedback_;
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+    actionlib::SimpleActionServer<lipm_msgs::MotionControlAction> *as_; 
     ~control();
     control(ros::NodeHandle nh_);
-    void desiredTrajectoryCb(const lipm_msgs::TrajectoryPointsConstPtr &comd_msg,const  lipm_msgs::TrajectoryPointsConstPtr &vrpd_msg,const lipm_msgs::TrajectoryPointsConstPtr &dcmd_msg, 
-        const lipm_msgs::TrajectoryPointsConstPtr &LLeg_msg,const  lipm_msgs::TrajectoryPointsConstPtr &RLeg_msg);
+    void desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal);
     void popFeedback();
     void run();
 };
