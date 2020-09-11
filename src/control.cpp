@@ -15,6 +15,8 @@ control::control(ros::NodeHandle nh_)
     desiredTrajectoryAvailable = false;
     as_ = new actionlib::SimpleActionServer<lipm_msgs::MotionControlAction>(nh, "lipm_control/plan", boost::bind(&control::desiredTrajectoryCb, this, _1), false);
     as_->start();
+    ac_ = new actionlib::SimpleActionClient<whole_body_ik_msgs::HumanoidAction>("/talos/whole_body_control", true);
+    ac_->waitForServer();
 }
 void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal)
 {
@@ -44,19 +46,42 @@ void control::run()
             //if(CoMbuffer.size()>0 && ZMPBuffer.size()>0 && torsoBuffer.size()>0)
             if(1)
             {
-                Vector3d tmp = Vector3d(CoMTrajectory.velocities[i].x, CoMTrajectory.velocities[i].y, CoMTrajectory.velocities[i].z);
-                //wbc.setCoMLinearTask(tmp);
-                tmp = Vector3d(0,0,0);
-                //wbc.setTorsoAngularTask(tmp);
-                tmp = Vector3d(LLegTrajectory.positions[i].x, LLegTrajectory.positions[i].y, LLegTrajectory.positions[i].z);
-                //wbc.setLLegLinearTask(tmp);
-                tmp = Vector3d(0,0,0);
-               // wbc.setLLegAngularTask(tmp);
-                tmp = Vector3d(RLegTrajectory.positions[i].x, RLegTrajectory.positions[i].y, RLegTrajectory.positions[i].z);
-                //wbc.setRLegLinearTask(tmp);
-                tmp = Vector3d(0,0,0);
-                //.setRLegAngularTask(tmp);
-                //wbc.ik();
+                whole_body_ik_msgs::HumanoidGoal humanoidGoal_;
+                //humanoidGoal_.CoM.x = CoMTrajectory.velocities[i].x;
+                //humanoidGoal_.CoM.y = CoMTrajectory.velocities[i].y;
+                //humanoidGoal_.CoM.z = CoMTrajectory.velocities[i].z;
+                humanoidGoal_.CoM.linear_velocity.x = 0;
+                humanoidGoal_.CoM.linear_velocity.y = 0;
+                humanoidGoal_.CoM.linear_velocity.z = 0;
+                humanoidGoal_.CoM.linear_velocity.weight = 100.0;
+                humanoidGoal_.CoM.linear_velocity.gain = 0.5;
+                humanoidGoal_.dt = 1.0/freq;
+
+                humanoidGoal_.LLeg.linear_velocity.x = 0;
+                humanoidGoal_.LLeg.linear_velocity.y = 0;
+                humanoidGoal_.LLeg.linear_velocity.z = 0;
+                humanoidGoal_.LLeg.linear_velocity.weight = 1000.0;
+                humanoidGoal_.LLeg.linear_velocity.gain = 0.5;
+
+                humanoidGoal_.LLeg.angular_velocity.x = 0;
+                humanoidGoal_.LLeg.angular_velocity.y = 0;
+                humanoidGoal_.LLeg.angular_velocity.z = 0;
+                humanoidGoal_.LLeg.angular_velocity.weight = 1000.0;
+                humanoidGoal_.LLeg.angular_velocity.gain = 0.5;
+
+                humanoidGoal_.RLeg.linear_velocity.x = 0;
+                humanoidGoal_.RLeg.linear_velocity.y = 0;
+                humanoidGoal_.RLeg.linear_velocity.z = 0;
+                humanoidGoal_.RLeg.linear_velocity.weight = 1000.0;
+                humanoidGoal_.RLeg.linear_velocity.gain = 0.5;
+
+                humanoidGoal_.RLeg.angular_velocity.x = 0;
+                humanoidGoal_.RLeg.angular_velocity.y = 0;
+                humanoidGoal_.RLeg.angular_velocity.z = 0;
+                humanoidGoal_.RLeg.angular_velocity.weight = 1000.0;
+                humanoidGoal_.RLeg.angular_velocity.gain = 0.5;
+                
+                ac_->sendGoal(humanoidGoal_);
                 i++;
             }
         }

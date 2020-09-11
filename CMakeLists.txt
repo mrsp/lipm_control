@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   lipm_msgs
   actionlib
+  whole_body_ik_msgs
 )
 find_package(Eigen3)
 find_package(Boost REQUIRED)
@@ -18,7 +19,7 @@ find_package(Boost REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lipm_control
-  CATKIN_DEPENDS geometry_msgs roscpp lipm_msgs actionlib  
+  CATKIN_DEPENDS geometry_msgs roscpp lipm_msgs actionlib  whole_body_ik_msgs
   DEPENDS Eigen3
 )
 

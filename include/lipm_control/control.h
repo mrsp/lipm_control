@@ -6,7 +6,8 @@
 #include <lipm_msgs/TrajectoryPoints.h>
 #include <lipm_msgs/MotionControlAction.h>
 #include <actionlib/server/simple_action_server.h>
-
+#include <actionlib/client/simple_action_client.h>
+#include <whole_body_ik_msgs/HumanoidAction.h>
 using namespace Eigen;
 
 
@@ -25,6 +26,8 @@ private:
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     actionlib::SimpleActionServer<lipm_msgs::MotionControlAction> *as_; 
+    actionlib::SimpleActionClient<whole_body_ik_msgs::HumanoidAction> *ac_;
+
     ~control();
     control(ros::NodeHandle nh_);
     void desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal);
