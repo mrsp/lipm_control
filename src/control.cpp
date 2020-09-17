@@ -50,36 +50,39 @@ void control::run()
                 //humanoidGoal_.CoM.x = CoMTrajectory.velocities[i].x;
                 //humanoidGoal_.CoM.y = CoMTrajectory.velocities[i].y;
                 //humanoidGoal_.CoM.z = CoMTrajectory.velocities[i].z;
-                humanoidGoal_.CoM.linear_velocity.x = 0;
-                humanoidGoal_.CoM.linear_velocity.y = 0;
-                humanoidGoal_.CoM.linear_velocity.z = 0;
-                humanoidGoal_.CoM.linear_velocity.weight = 100.0;
-                humanoidGoal_.CoM.linear_velocity.gain = 0.5;
+                humanoidGoal_.CoM.linear_task.des.x = 0;
+                humanoidGoal_.CoM.linear_task.des.y = 0;
+                humanoidGoal_.CoM.linear_task.des.z = 0;
+                humanoidGoal_.CoM.linear_task.weight = 10.0;
+                humanoidGoal_.CoM.linear_task.gain = 0.5;
                 humanoidGoal_.dt = 1.0/freq;
 
-                humanoidGoal_.LLeg.linear_velocity.x = 0;
-                humanoidGoal_.LLeg.linear_velocity.y = 0;
-                humanoidGoal_.LLeg.linear_velocity.z = 0;
-                humanoidGoal_.LLeg.linear_velocity.weight = 1000.0;
-                humanoidGoal_.LLeg.linear_velocity.gain = 0.5;
+                humanoidGoal_.LLeg.linear_task.des.x = 0;
+                humanoidGoal_.LLeg.linear_task.des.y = 0;
+                humanoidGoal_.LLeg.linear_task.des.z = 0;
+                humanoidGoal_.LLeg.linear_task.weight = 1000.0;
+                humanoidGoal_.LLeg.linear_task.gain = 0.5;
 
-                humanoidGoal_.LLeg.angular_velocity.x = 0;
-                humanoidGoal_.LLeg.angular_velocity.y = 0;
-                humanoidGoal_.LLeg.angular_velocity.z = 0;
-                humanoidGoal_.LLeg.angular_velocity.weight = 1000.0;
-                humanoidGoal_.LLeg.angular_velocity.gain = 0.5;
+                humanoidGoal_.LLeg.angular_task.des.x = 0;
+                humanoidGoal_.LLeg.angular_task.des.y = 0;
+                humanoidGoal_.LLeg.angular_task.des.z = 0;
+                humanoidGoal_.LLeg.angular_task.des.w = 1;
+                humanoidGoal_.LLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.LLeg.angular_task.gain = 0.5;
 
-                humanoidGoal_.RLeg.linear_velocity.x = 0;
-                humanoidGoal_.RLeg.linear_velocity.y = 0;
-                humanoidGoal_.RLeg.linear_velocity.z = 0;
-                humanoidGoal_.RLeg.linear_velocity.weight = 1000.0;
-                humanoidGoal_.RLeg.linear_velocity.gain = 0.5;
+                humanoidGoal_.RLeg.linear_task.des.x = 0;
+                humanoidGoal_.RLeg.linear_task.des.y = 0;
+                humanoidGoal_.RLeg.linear_task.des.z = 0;
+                humanoidGoal_.RLeg.linear_task.weight = 1000.0;
+                humanoidGoal_.RLeg.linear_task.gain = 0.5;
 
-                humanoidGoal_.RLeg.angular_velocity.x = 0;
-                humanoidGoal_.RLeg.angular_velocity.y = 0;
-                humanoidGoal_.RLeg.angular_velocity.z = 0;
-                humanoidGoal_.RLeg.angular_velocity.weight = 1000.0;
-                humanoidGoal_.RLeg.angular_velocity.gain = 0.5;
+                humanoidGoal_.RLeg.angular_task.des.x = 0;
+                humanoidGoal_.RLeg.angular_task.des.y = 0;
+                humanoidGoal_.RLeg.angular_task.des.
+                z = 0;
+                humanoidGoal_.LLeg.angular_task.des.w = 1;
+                humanoidGoal_.RLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.RLeg.angular_task.gain = 0.5;
                 
                 ac_->sendGoal(humanoidGoal_);
                 i++;
