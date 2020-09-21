@@ -6,12 +6,13 @@ control::control(ros::NodeHandle nh_)
     ros::NodeHandle n_p("~");
     double g, comZ, dt;
     n_p.param<double>("gravity", g, 9.80665);
-    n_p.param<double>("comZ", comZ, 0.26);
-    n_p.param<double>("dt", dt, 0.01);
+    n_p.param<double>("comZ", comZ, 0.858);
+    n_p.param<double>("dt", dt, 0.02);
     n_p.param<double>("control_frequency", freq, 50);
-
+    Twb = Eigen::Affine3d::Identity();
     i = 0;
     trajectorySize = 0;
+    odom_sub = nh.subscribe("/floating_base_pose_simulated", 1, &control::odomCb, this);
     desiredTrajectoryAvailable = false;
     as_ = new actionlib::SimpleActionServer<lipm_msgs::MotionControlAction>(nh, "lipm_control/plan", boost::bind(&control::desiredTrajectoryCb, this, _1), false);
     as_->start();
@@ -34,6 +35,14 @@ void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &go
     std::cout<<"Message Received"<<std::endl;
 }
 
+void control::odomCb(const nav_msgs::OdometryConstPtr &msg)
+{
+    odom_inc = true;
+    Twb.translation() = Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    qwb = Eigen::Quaterniond(msg->pose.pose.orientation.w,msg->pose.pose.orientation.x,msg->pose.pose.orientation.y,msg->pose.pose.orientation.z);
+    Twb.linear() = qwb.toRotationMatrix();
+}
+
 
 void control::run()
 {
@@ -44,47 +53,102 @@ void control::run()
         if(desiredTrajectoryAvailable && i < trajectorySize)
         {
             //if(CoMbuffer.size()>0 && ZMPBuffer.size()>0 && torsoBuffer.size()>0)
-            if(1)
+            if(odom_inc)
             {
+                odom_inc = false;
                 whole_body_ik_msgs::HumanoidGoal humanoidGoal_;
-                //humanoidGoal_.CoM.x = CoMTrajectory.velocities[i].x;
-                //humanoidGoal_.CoM.y = CoMTrajectory.velocities[i].y;
-                //humanoidGoal_.CoM.z = CoMTrajectory.velocities[i].z;
-                humanoidGoal_.CoM.linear_task.des.x = 0;
-                humanoidGoal_.CoM.linear_task.des.y = 0;
-                humanoidGoal_.CoM.linear_task.des.z = 0;
+
+                Eigen::Vector3d temp = Eigen::Vector3d(CoMTrajectory.positions[i].x, CoMTrajectory.positions[i].y, CoMTrajectory.positions[i].z);
+                temp = Twb.inverse() * temp;
+                humanoidGoal_.CoM.linear_task.des.x = temp(0);
+                humanoidGoal_.CoM.linear_task.des.y = temp(1);
+                humanoidGoal_.CoM.linear_task.des.z = temp(2);
+                //humanoidGoal_.CoM.linear_task.des.x = 0.0259240577632;
+                //humanoidGoal_.CoM.linear_task.des.y = -0.000263675138099;
+                //humanoidGoal_.CoM.linear_task.des.z = -0.11631700406;
+
                 humanoidGoal_.CoM.linear_task.weight = 10.0;
                 humanoidGoal_.CoM.linear_task.gain = 0.5;
                 humanoidGoal_.dt = 1.0/freq;
 
-                humanoidGoal_.LLeg.linear_task.des.x = 0;
-                humanoidGoal_.LLeg.linear_task.des.y = 0;
-                humanoidGoal_.LLeg.linear_task.des.z = 0;
-                humanoidGoal_.LLeg.linear_task.weight = 1000.0;
+                temp = Eigen::Vector3d(LLegTrajectory.positions[i].x, LLegTrajectory.positions[i].y, LLegTrajectory.positions[i].z);
+                temp = Twb.inverse() * temp;
+                humanoidGoal_.LLeg.linear_task.des.x = temp(0);
+                humanoidGoal_.LLeg.linear_task.des.y = temp(1);
+                humanoidGoal_.LLeg.linear_task.des.z = temp(2);
+                //humanoidGoal_.LLeg.linear_task.des.x = 0.00842687758184;
+                //humanoidGoal_.LLeg.linear_task.des.y =  0.0852573000938;
+                //humanoidGoal_.LLeg.linear_task.des.z = -0.991225844005;
+                humanoidGoal_.LLeg.linear_task.weight = 100.0;
                 humanoidGoal_.LLeg.linear_task.gain = 0.5;
 
                 humanoidGoal_.LLeg.angular_task.des.x = 0;
                 humanoidGoal_.LLeg.angular_task.des.y = 0;
                 humanoidGoal_.LLeg.angular_task.des.z = 0;
                 humanoidGoal_.LLeg.angular_task.des.w = 1;
-                humanoidGoal_.LLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.LLeg.angular_task.weight = 100.0;
                 humanoidGoal_.LLeg.angular_task.gain = 0.5;
 
-                humanoidGoal_.RLeg.linear_task.des.x = 0;
-                humanoidGoal_.RLeg.linear_task.des.y = 0;
-                humanoidGoal_.RLeg.linear_task.des.z = 0;
-                humanoidGoal_.RLeg.linear_task.weight = 1000.0;
+                temp = Eigen::Vector3d(RLegTrajectory.positions[i].x, RLegTrajectory.positions[i].y, RLegTrajectory.positions[i].z);
+                temp = Twb.inverse() * temp;
+                humanoidGoal_.RLeg.linear_task.des.x = temp(0);
+                humanoidGoal_.RLeg.linear_task.des.y = temp(1);
+                humanoidGoal_.RLeg.linear_task.des.z = temp(2);
+                // humanoidGoal_.RLeg.linear_task.des.x = 0.00842687758184;
+                // humanoidGoal_.RLeg.linear_task.des.y = -0.0852573000938;
+                // humanoidGoal_.RLeg.linear_task.des.z = -0.991225844005;
+                humanoidGoal_.RLeg.linear_task.weight = 100.0;
                 humanoidGoal_.RLeg.linear_task.gain = 0.5;
 
                 humanoidGoal_.RLeg.angular_task.des.x = 0;
                 humanoidGoal_.RLeg.angular_task.des.y = 0;
-                humanoidGoal_.RLeg.angular_task.des.
-                z = 0;
-                humanoidGoal_.LLeg.angular_task.des.w = 1;
-                humanoidGoal_.RLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.RLeg.angular_task.des.z = 0;
+                humanoidGoal_.RLeg.angular_task.des.w = 1;
+                humanoidGoal_.RLeg.angular_task.weight = 100.0;
                 humanoidGoal_.RLeg.angular_task.gain = 0.5;
                 
+                humanoidGoal_.Head.linear_task.des.x =  0.0201189;
+                humanoidGoal_.Head.linear_task.des.y =  0;
+                humanoidGoal_.Head.linear_task.des.z =  0.393193;
+                humanoidGoal_.Head.linear_task.weight = 1.0;
+                humanoidGoal_.Head.linear_task.gain = 0.5;    
+
+                humanoidGoal_.Head.angular_task.des.x = 0;
+                humanoidGoal_.Head.angular_task.des.y = 0;
+                humanoidGoal_.Head.angular_task.des.z = 0;
+                humanoidGoal_.Head.angular_task.des.w = 1;
+                humanoidGoal_.Head.angular_task.weight = 1.0;
+                humanoidGoal_.Head.angular_task.gain = 0.5;
+
+                humanoidGoal_.RHand.linear_task.des.x =  0.201773;
+                humanoidGoal_.RHand.linear_task.des.y =  -0.359338;
+                humanoidGoal_.RHand.linear_task.des.z =  0.0106318;
+                humanoidGoal_.RHand.linear_task.weight = 1.0;
+                humanoidGoal_.RHand.linear_task.gain = 0.5;
+
+
+                humanoidGoal_.RHand.angular_task.des.x = -0.0684384;
+                humanoidGoal_.RHand.angular_task.des.y = -0.6058;
+                humanoidGoal_.RHand.angular_task.des.z = 0.198244;
+                humanoidGoal_.RHand.angular_task.des.w = 0.767477;
+                humanoidGoal_.RHand.angular_task.weight = 1.0;
+                humanoidGoal_.RHand.angular_task.gain = 0.5;
+
+                humanoidGoal_.LHand.linear_task.des.x =  0.201774;
+                humanoidGoal_.LHand.linear_task.des.y =  0.359338;
+                humanoidGoal_.LHand.linear_task.des.z =  0.0106231;
+                humanoidGoal_.LHand.linear_task.weight = 1.0;
+                humanoidGoal_.LHand.linear_task.gain = 0.5;
+   
+                humanoidGoal_.LHand.angular_task.des.x = 0.0685307;
+                humanoidGoal_.LHand.angular_task.des.y =  -0.60584;
+                humanoidGoal_.LHand.angular_task.des.z =  -0.19819;
+                humanoidGoal_.LHand.angular_task.des.w = 0.767451;
+                humanoidGoal_.LHand.angular_task.weight = 1.0;
+                humanoidGoal_.LHand.angular_task.gain = 0.5;
+
                 ac_->sendGoal(humanoidGoal_);
+                ac_->waitForResult();
                 i++;
             }
         }
