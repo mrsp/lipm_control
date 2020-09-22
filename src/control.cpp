@@ -57,37 +57,37 @@ void control::run()
             {
                 odom_inc = false;
                 whole_body_ik_msgs::HumanoidGoal humanoidGoal_;
+                humanoidGoal_.dt = 1.0/freq;
 
                 Eigen::Vector3d temp = Eigen::Vector3d(CoMTrajectory.positions[i].x, CoMTrajectory.positions[i].y, CoMTrajectory.positions[i].z);
                 temp = Twb.inverse() * temp;
                 humanoidGoal_.CoM.linear_task.des.x = temp(0);
                 humanoidGoal_.CoM.linear_task.des.y = temp(1);
                 humanoidGoal_.CoM.linear_task.des.z = temp(2);
-                //humanoidGoal_.CoM.linear_task.des.x = 0.0259240577632;
-                //humanoidGoal_.CoM.linear_task.des.y = -0.000263675138099;
-                //humanoidGoal_.CoM.linear_task.des.z = -0.11631700406;
+                // humanoidGoal_.CoM.linear_task.des.x = 0.0259240577632;
+                // humanoidGoal_.CoM.linear_task.des.y = -0.000263675138099;
+                // humanoidGoal_.CoM.linear_task.des.z = -0.11631700406;
 
-                humanoidGoal_.CoM.linear_task.weight = 10.0;
-                humanoidGoal_.CoM.linear_task.gain = 0.5;
-                humanoidGoal_.dt = 1.0/freq;
+                // humanoidGoal_.CoM.linear_task.weight = 10;
+                // humanoidGoal_.CoM.linear_task.gain = 0.85;
 
                 temp = Eigen::Vector3d(LLegTrajectory.positions[i].x, LLegTrajectory.positions[i].y, LLegTrajectory.positions[i].z);
                 temp = Twb.inverse() * temp;
                 humanoidGoal_.LLeg.linear_task.des.x = temp(0);
                 humanoidGoal_.LLeg.linear_task.des.y = temp(1);
                 humanoidGoal_.LLeg.linear_task.des.z = temp(2);
-                //humanoidGoal_.LLeg.linear_task.des.x = 0.00842687758184;
-                //humanoidGoal_.LLeg.linear_task.des.y =  0.0852573000938;
-                //humanoidGoal_.LLeg.linear_task.des.z = -0.991225844005;
-                humanoidGoal_.LLeg.linear_task.weight = 100.0;
-                humanoidGoal_.LLeg.linear_task.gain = 0.5;
+                // humanoidGoal_.LLeg.linear_task.des.x = 0.00842687758184;
+                // humanoidGoal_.LLeg.linear_task.des.y =  0.0852573000938;
+                // humanoidGoal_.LLeg.linear_task.des.z = -0.991225844005;
+                humanoidGoal_.LLeg.linear_task.weight = 1000.0;
+                humanoidGoal_.LLeg.linear_task.gain = 0.85;
 
                 humanoidGoal_.LLeg.angular_task.des.x = 0;
                 humanoidGoal_.LLeg.angular_task.des.y = 0;
                 humanoidGoal_.LLeg.angular_task.des.z = 0;
                 humanoidGoal_.LLeg.angular_task.des.w = 1;
-                humanoidGoal_.LLeg.angular_task.weight = 100.0;
-                humanoidGoal_.LLeg.angular_task.gain = 0.5;
+                humanoidGoal_.LLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.LLeg.angular_task.gain = 0.85;
 
                 temp = Eigen::Vector3d(RLegTrajectory.positions[i].x, RLegTrajectory.positions[i].y, RLegTrajectory.positions[i].z);
                 temp = Twb.inverse() * temp;
@@ -97,55 +97,65 @@ void control::run()
                 // humanoidGoal_.RLeg.linear_task.des.x = 0.00842687758184;
                 // humanoidGoal_.RLeg.linear_task.des.y = -0.0852573000938;
                 // humanoidGoal_.RLeg.linear_task.des.z = -0.991225844005;
-                humanoidGoal_.RLeg.linear_task.weight = 100.0;
-                humanoidGoal_.RLeg.linear_task.gain = 0.5;
+                humanoidGoal_.RLeg.linear_task.weight = 1000.0;
+                humanoidGoal_.RLeg.linear_task.gain = 0.85;
 
                 humanoidGoal_.RLeg.angular_task.des.x = 0;
                 humanoidGoal_.RLeg.angular_task.des.y = 0;
                 humanoidGoal_.RLeg.angular_task.des.z = 0;
                 humanoidGoal_.RLeg.angular_task.des.w = 1;
-                humanoidGoal_.RLeg.angular_task.weight = 100.0;
-                humanoidGoal_.RLeg.angular_task.gain = 0.5;
+                humanoidGoal_.RLeg.angular_task.weight = 1000.0;
+                humanoidGoal_.RLeg.angular_task.gain = 0.85;
                 
-                humanoidGoal_.Head.linear_task.des.x =  0.0201189;
-                humanoidGoal_.Head.linear_task.des.y =  0;
-                humanoidGoal_.Head.linear_task.des.z =  0.393193;
-                humanoidGoal_.Head.linear_task.weight = 1.0;
-                humanoidGoal_.Head.linear_task.gain = 0.5;    
-
-                humanoidGoal_.Head.angular_task.des.x = 0;
-                humanoidGoal_.Head.angular_task.des.y = 0;
-                humanoidGoal_.Head.angular_task.des.z = 0;
-                humanoidGoal_.Head.angular_task.des.w = 1;
-                humanoidGoal_.Head.angular_task.weight = 1.0;
-                humanoidGoal_.Head.angular_task.gain = 0.5;
-
-                humanoidGoal_.RHand.linear_task.des.x =  0.201773;
-                humanoidGoal_.RHand.linear_task.des.y =  -0.359338;
-                humanoidGoal_.RHand.linear_task.des.z =  0.0106318;
-                humanoidGoal_.RHand.linear_task.weight = 1.0;
-                humanoidGoal_.RHand.linear_task.gain = 0.5;
 
 
-                humanoidGoal_.RHand.angular_task.des.x = -0.0684384;
-                humanoidGoal_.RHand.angular_task.des.y = -0.6058;
-                humanoidGoal_.RHand.angular_task.des.z = 0.198244;
-                humanoidGoal_.RHand.angular_task.des.w = 0.767477;
-                humanoidGoal_.RHand.angular_task.weight = 1.0;
-                humanoidGoal_.RHand.angular_task.gain = 0.5;
+                // humanoidGoal_.Torso.angular_task.des.x = 0;
+                // humanoidGoal_.Torso.angular_task.des.y = 0;
+                // humanoidGoal_.Torso.angular_task.des.z = 0;
+                // humanoidGoal_.Torso.angular_task.des.w = 1;
+                // humanoidGoal_.Torso.angular_task.weight = 1;
+                // humanoidGoal_.Torso.angular_task.gain = 0.85;
+                
 
-                humanoidGoal_.LHand.linear_task.des.x =  0.201774;
-                humanoidGoal_.LHand.linear_task.des.y =  0.359338;
-                humanoidGoal_.LHand.linear_task.des.z =  0.0106231;
-                humanoidGoal_.LHand.linear_task.weight = 1.0;
-                humanoidGoal_.LHand.linear_task.gain = 0.5;
+                // humanoidGoal_.Head.linear_task.des.x =  0.0201189;
+                // humanoidGoal_.Head.linear_task.des.y =  0;
+                // humanoidGoal_.Head.linear_task.des.z =  0.393193;
+                // humanoidGoal_.Head.linear_task.weight = 1;
+                // humanoidGoal_.Head.linear_task.gain = 0.85;    
+
+                // humanoidGoal_.Head.angular_task.des.x = 0;
+                // humanoidGoal_.Head.angular_task.des.y = 0;
+                // humanoidGoal_.Head.angular_task.des.z = 0;
+                // humanoidGoal_.Head.angular_task.des.w = 1;
+                // humanoidGoal_.Head.angular_task.weight = 1;
+                // humanoidGoal_.Head.angular_task.gain = 0.85;
+
+                // humanoidGoal_.RHand.linear_task.des.x =  0.201773;
+                // humanoidGoal_.RHand.linear_task.des.y =  -0.359338;
+                // humanoidGoal_.RHand.linear_task.des.z =  0.0106318;
+                // humanoidGoal_.RHand.linear_task.weight = 1;
+                // humanoidGoal_.RHand.linear_task.gain = 0.85;
+
+
+                // humanoidGoal_.RHand.angular_task.des.x = -0.0684384;
+                // humanoidGoal_.RHand.angular_task.des.y = -0.6058;
+                // humanoidGoal_.RHand.angular_task.des.z = 0.198244;
+                // humanoidGoal_.RHand.angular_task.des.w = 0.767477;
+                // humanoidGoal_.RHand.angular_task.weight = 1;
+                // humanoidGoal_.RHand.angular_task.gain = 0.5;
+
+                // humanoidGoal_.LHand.linear_task.des.x =  0.201774;
+                // humanoidGoal_.LHand.linear_task.des.y =  0.359338;
+                // humanoidGoal_.LHand.linear_task.des.z =  0.0106231;
+                // humanoidGoal_.LHand.linear_task.weight = 1;
+                // humanoidGoal_.LHand.linear_task.gain = 0.85;
    
-                humanoidGoal_.LHand.angular_task.des.x = 0.0685307;
-                humanoidGoal_.LHand.angular_task.des.y =  -0.60584;
-                humanoidGoal_.LHand.angular_task.des.z =  -0.19819;
-                humanoidGoal_.LHand.angular_task.des.w = 0.767451;
-                humanoidGoal_.LHand.angular_task.weight = 1.0;
-                humanoidGoal_.LHand.angular_task.gain = 0.5;
+                // humanoidGoal_.LHand.angular_task.des.x = 0.0685307;
+                // humanoidGoal_.LHand.angular_task.des.y =  -0.60584;
+                // humanoidGoal_.LHand.angular_task.des.z =  -0.19819;
+                // humanoidGoal_.LHand.angular_task.des.w = 0.767451;
+                // humanoidGoal_.LHand.angular_task.weight = 1;
+                // humanoidGoal_.LHand.angular_task.gain = 0.85;
 
                 ac_->sendGoal(humanoidGoal_);
                 ac_->waitForResult();
