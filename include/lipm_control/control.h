@@ -25,6 +25,7 @@ private:
     lipm_msgs::MotionControlResult result_;
     lipm_msgs::MotionControlFeedback feedback_;
     bool odom_inc;
+    bool init;
     Eigen::Affine3d Twb;
     Eigen::Quaterniond qwb;
 public:
