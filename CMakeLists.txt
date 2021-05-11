@@ -29,6 +29,6 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
 )
-add_executable(lipm_control_node src/main.cpp src/control.cpp)
+add_executable(lipm_control_node src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
 add_dependencies(lipm_control_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lipm_control_node ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})
