@@ -36,20 +36,18 @@ void ZMPDistributor::computeDistribution(Vector3d pzmp_d, Vector3d pzmp, Vector3
     fr = fr_;
     //taul = taul_;
     //taur = taur_;
+
     if(!double_support)
     {
         if(right_support)
         {
             frd(2) = maxForceReadingR;
             taurd = (RFoot.footA - pzmp_d).cross(frd);
-            //taur = (RFoot.footA - pzmp).cross(fr);       
-   
         }
         else
         {
             fld(2) = maxForceReadingL;
             tauld =  (LFoot.footA - pzmp_d).cross(fld);
-            //taul =  (LFoot.footA - pzmp).cross(fl);
         }
     }
     else
@@ -140,6 +138,7 @@ void ZMPDistributor::computeDistribution(Vector3d pzmp_d, Vector3d pzmp, Vector3
         //     }
         // }
     }
+  
 
 
 }

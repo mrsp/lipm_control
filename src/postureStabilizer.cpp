@@ -30,7 +30,7 @@ void postureStabilizer::footTorqueStabilizer(Vector3d tauld, Vector3d taurd, Vec
     Ka_ = robot.getWalkParameter(Ka);
     dt = robot.getWalkParameter(Ts);
 
-    if(right_contact)
+    if(left_contact)
     {
         dL_Roll = Ka_ * dt * (tauld(0) - taul(0)) + (1.0 - dt / Ta_) * dL_Roll;
         dL_Pitch = Ka_ * dt * (tauld(1) - taul(1)) + (1.0 - dt / Ta_) * dL_Pitch;
@@ -40,7 +40,7 @@ void postureStabilizer::footTorqueStabilizer(Vector3d tauld, Vector3d taurd, Vec
         dL_Roll = 0.0;
         dL_Pitch = 0.0;
     }
-    if(left_contact)
+    if(right_contact)
     {
         dR_Roll = Ka_ * dt * (taurd(0) - taur(0)) + (1.0 - dt / Ta_) * dR_Roll;
         dR_Pitch = Ka_ * dt * (taurd(1) - taur(1)) + (1.0 - dt / Ta_) * dR_Pitch;
@@ -50,10 +50,6 @@ void postureStabilizer::footTorqueStabilizer(Vector3d tauld, Vector3d taurd, Vec
         dR_Roll = 0.0;
         dR_Pitch = 0.0;
     }
-    std::cout<<"Stabilization of Legs "<<std::endl;
-    std::cout<<"Left "<<tauld.transpose()<<" "<<taul.transpose()<<std::endl;
-    std::cout<<"Right "<<taurd.transpose()<<" "<<taur.transpose()<<std::endl;
-
 }
 
 void postureStabilizer::resetFootForceStabilizer()
@@ -91,6 +87,7 @@ void postureStabilizer::baseOrientationStabilizer(double base_Roll, double base_
 
     dbase_Roll = Kc_ * dt * (base_Roll_d - base_Roll) + (1.0 - dt / Tc_) * dbase_Roll;
     dbase_Pitch = Kc_ * dt * (base_Pitch_d - base_Pitch) + (1.0 - dt / Tc_) * dbase_Pitch;
+
 }
 
 Vector3d postureStabilizer::getBaseOrientation()

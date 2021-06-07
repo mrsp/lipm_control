@@ -34,7 +34,7 @@ public:
     RobotParameters()
     {
         snprintf(robotName,256,"default");
-        WalkParameters[Ts] = 0.005;
+        WalkParameters[Ts] = 0.01;
         WalkParameters[Td] = 0.05;
         WalkParameters[ComZ] = 1.14398;
         WalkParameters[g] = 9.80665;
@@ -44,11 +44,11 @@ public:
         WalkParameters[StepXH] = -0.090;
         WalkParameters[StepYL] = 0.04;
         WalkParameters[StepYR] = -0.04;
-        WalkParameters[Tc] = 0.1; 
+        WalkParameters[Tc] = 0.02; 
         WalkParameters[Ta] = 0.01;  
-        WalkParameters[Tn] = 0.1; 
-        WalkParameters[Kc] = 2.5;   
-        WalkParameters[Ka] = 0.0005; 
+        WalkParameters[Tn] = 0.05; 
+        WalkParameters[Kc] = 0.1;   
+        WalkParameters[Ka] = 0.001; 
         WalkParameters[Kn] = 0.005; 
     }
     
