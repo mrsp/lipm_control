@@ -7,6 +7,7 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  nav_msgs  
   roscpp
   lipm_msgs
   actionlib
@@ -19,7 +20,7 @@ find_package(Boost REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lipm_control
-  CATKIN_DEPENDS geometry_msgs roscpp lipm_msgs actionlib  whole_body_ik_msgs
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp lipm_msgs actionlib  whole_body_ik_msgs
   DEPENDS EIGEN3
 )
 
@@ -29,6 +30,12 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
 )
+
+add_library(lipm_control src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
+add_dependencies(lipm_control ${catkin_EXPORTED_TARGETS})
+target_link_libraries(lipm_control ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})
+
+
 add_executable(lipm_control_node src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
 add_dependencies(lipm_control_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lipm_control_node ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})

@@ -9,8 +9,11 @@
 #include <actionlib/client/simple_action_client.h>
 #include <whole_body_ik_msgs/HumanoidAction.h>
 #include <nav_msgs/Odometry.h>
-using namespace Eigen;
+#include <sensor_msgs/JointState.h>
+#include "lipm_control/Queue.h"
 
+using namespace Eigen;
+using namespace std;
 
 class control
 {
@@ -24,20 +27,32 @@ private:
     lipm_msgs::TrajectoryPoints CoMTrajectory, VRPTrajectory, DCMTrajectory, LLegTrajectory, RLegTrajectory;
     lipm_msgs::MotionControlResult result_;
     lipm_msgs::MotionControlFeedback feedback_;
-    bool odom_inc;
     bool init;
     Eigen::Affine3d Twb;
     Eigen::Quaterniond qwb;
+    Eigen::Vector3d pwb, CoM, vCoM, vwb, omegawb;
+    Queue<sensor_msgs::JointStateConstPtr> joint_data;
+	Queue<nav_msgs::OdometryConstPtr> odom_data, com_data;
+    nav_msgs::Odometry odom_msg, com_msg;
+    sensor_msgs::JointState joint_state_msg;
+    VectorXd jointNominalConfig;
+    std::vector<std::string> joint_names;
+
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     actionlib::SimpleActionServer<lipm_msgs::MotionControlAction> *as_; 
     actionlib::SimpleActionClient<whole_body_ik_msgs::HumanoidAction> *ac_;
-    ros::Subscriber odom_sub;
+    ros::Subscriber odom_sub, com_sub, joint_state_sub;
     ~control();
     control(ros::NodeHandle nh_);
     void desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal);
     void popFeedback();
     void run();
     void odomCb(const nav_msgs::OdometryConstPtr &msg);
+    void CoMCb(const nav_msgs::OdometryConstPtr &msg);
+    void jointStateCb(const sensor_msgs::JointStateConstPtr &msg);
+    void joints(const sensor_msgs::JointStateConstPtr &msg);
+    void odom(const nav_msgs::OdometryConstPtr &msg);
+    void com(const nav_msgs::OdometryConstPtr &msg);
 };
 #endif
