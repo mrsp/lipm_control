@@ -36,8 +36,7 @@ private:
     nav_msgs::Odometry odom_msg, com_msg;
     sensor_msgs::JointState joint_state_msg;
     VectorXd jointNominalConfig;
-    std::vector<std::string> joint_names;
-
+    std::string com_topic, odom_topic, joint_state_topic, action_server_topic;
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     actionlib::SimpleActionServer<lipm_msgs::MotionControlAction> *as_; 

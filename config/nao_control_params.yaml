@@ -1,0 +1,8 @@
+hc: 0.26818
+gravity: 9.80665
+dt: 0.01
+control_frequency: 100
+joint_state_topic: "/nao_raisim_ros/joint_states"
+com_topic: "/nao_raisim_ros/CoM"
+odom_topic: "/nao_raisim_ros/odom"
+action_server_topic: "/nao_raisim_ros/whole_body_control"
