@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(lipm_control)
-
-## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
+add_definitions("-DBOOST_MPL_LIMIT_LIST_SIZE=30")
+
 
 
 find_package(catkin REQUIRED COMPONENTS
@@ -12,24 +12,35 @@ find_package(catkin REQUIRED COMPONENTS
   lipm_msgs
   actionlib
   whole_body_ik_msgs
-)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)
+  whole_body_ik
 
+)
+## System dependencies are found with CMake's conventions
+find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(qpmad)
+
+find_package(Eigen3 REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PINOCCHIO pinocchio REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lipm_control
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp lipm_msgs actionlib  whole_body_ik_msgs
-  DEPENDS EIGEN3
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp lipm_msgs actionlib  whole_body_ik_msgs whole_body_ik
+  DEPENDS EIGEN3 PINOCCHIO qpmad
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
-)
+  ${EIGEN3_INCLUDE_DIRS}
+  ${PINOCCHIO_INCLUDE_DIRS}
+  ${qpmad_INCLUDE_DIRS}
+  )
+  link_directories(${PINOCCHIO_LIBRARY_DIRS})
 
 add_library(lipm_control src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
 add_dependencies(lipm_control ${catkin_EXPORTED_TARGETS})

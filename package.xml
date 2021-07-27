@@ -56,6 +56,7 @@
   <build_depend>roscpp</build_depend>
   <build_depend>actionlib</build_depend>
   <build_depend>whole_body_ik_msgs</build_depend>
+  <build_depend>whole_body_ik</build_depend>
 
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>nav_msgs</build_export_depend>
@@ -63,6 +64,7 @@
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>actionlib</build_export_depend>
   <build_export_depend>whole_body_ik_msgs</build_export_depend>
+  <build_export_depend>whole_body_ik</build_export_depend>
 
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
@@ -70,6 +72,7 @@
   <exec_depend>roscpp</exec_depend>
   <exec_depend>actionlib</exec_depend>
   <exec_depend>whole_body_ik_msgs</exec_depend>
+  <exec_depend>whole_body_ik</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
