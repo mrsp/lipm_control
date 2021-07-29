@@ -32,7 +32,7 @@ private:
     lipm_msgs::MotionControlFeedback feedback_;
     bool init;
     Eigen::Affine3d Twb;
-    Eigen::Quaterniond qwb;
+    Eigen::Quaterniond qwb, lf_orient_ref, rf_orient_ref, h_orient_ref, rh_orient_ref, lh_orient_ref;
     Eigen::Vector3d pwb, CoM, vCoM, vCoM_, aCoM, CoM_ref, vCoM_ref, aCoM_ref, vwb, omegawb, ZMP, lf_pos_ref, rf_pos_ref;
     Queue<sensor_msgs::JointStateConstPtr> joint_data;
 	Queue<nav_msgs::OdometryConstPtr> odom_data, com_data;
@@ -40,12 +40,16 @@ private:
     LIPMControl *lc;  
     nav_msgs::Odometry odom_msg, com_msg;
     sensor_msgs::JointState joint_state_msg;
-    VectorXd jointNominalConfig, jointVelocityTarget, qd;
+    VectorXd jointNominalConfig, jointNominalVelocity, qd, dqd;
     std::string com_topic, odom_topic, joint_state_topic, action_server_topic, zmp_topic;
     nao_wbc* nao_whole_body_control;
     bool firstCoMVel, eop;
-    pin_wrapper *desired_pin;
-
+    double Gain;
+    double QGain;
+    whole_body_ik_msgs::HumanoidGoal humanoidGoal_;
+    double dof_weight;
+    double dof_gain;
+    bool CoM_Ad_enabled;
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     actionlib::SimpleActionServer<lipm_msgs::MotionControlAction> *as_; 

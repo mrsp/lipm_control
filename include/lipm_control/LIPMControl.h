@@ -4,16 +4,16 @@ class LIPMControl
   Vector3d dCoM_d_, ZMP_d, ZMP_c;
   Vector3d DCM_ref, dDCM_ref, DCM, dDCM;
   Vector3d sumDCM;
-  double  g, h, mass, dt;
+  double  g, h, dt;
   bool initialized;
 
 public:
   Matrix3d Kzmp, Kdcm, Kcom, Kddcm, Kidcm;
   double omega;
-  LIPMControl(double h_, double mass_, double dt_)
+  LIPMControl(double h_,  double dt_, double Pcom_x=0.02, double Pcom_y=0.01, double Pzmp_x=7, double Pzmp_y=7,
+  double Pdcm_x = 40, double Pdcm_y = 40, double Idcm_x =10, double Idcm_y=10)
   {
     dt = dt_;
-    mass = mass_;
     h = h_;
     g = 9.81;
     omega = sqrt(g / h);
@@ -26,21 +26,20 @@ public:
     sumDCM.setZero();
 
 
-    Kzmp(0, 0) = 7 / omega;
-    Kzmp(1, 1) = 7 / omega;
+    Kzmp(0, 0) = Pzmp_x / omega;
+    Kzmp(1, 1) = Pzmp_y / omega;
 
-    Kcom(0, 0) = 0.02;
-    Kcom(1, 1) = 0.01;
-    Kcom(2, 2) = 0.00;
+    Kcom(0, 0) = Pcom_x;
+    Kcom(1, 1) = Pcom_y;
 
-    Kdcm(0, 0) = 1.0 + 40 / omega;
-    Kdcm(1, 1) = 1.0 + 40 / omega;
+    Kdcm(0, 0) = 1.0 + Pdcm_x / omega;
+    Kdcm(1, 1) = 1.0 + Pdcm_y / omega;
 
     Kddcm(0, 0) = 15 / omega;
     Kddcm(1, 1) = 15 / omega;
 
-    Kidcm(0, 0) = 10 / omega;
-    Kidcm(1, 1) = 10 / omega;
+    Kidcm(0, 0) = Idcm_x / omega;
+    Kidcm(1, 1) = Idcm_y / omega;
 
     ddCoM_c.setZero();
     dCoM_c_.setZero();
@@ -81,7 +80,7 @@ public:
     ddCoM_c = (dCoM_c - dCoM_c_) / dt;
     dCoM_c_ = dCoM_c;
 
-    CoM_c = CoM_c + dCoM_c * dt;
+    CoM_c = CoM_d + dCoM_c * dt;
     // cout<<"Command CoM "<<CoM_c.transpose()<<" Measured CoM "<<CoM.transpose()<<endl;
     // cout<<"Desired DCM "<<DCM_ref.transpose()<<" Measured DCM "<<DCM.transpose()<<endl;
   }

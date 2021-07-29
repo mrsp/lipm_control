@@ -5,4 +5,27 @@ control_frequency: 100
 joint_state_topic: "/nao_raisim_ros/joint_states"
 com_topic: "/nao_raisim_ros/CoM"
 odom_topic: "/nao_raisim_ros/odom"
-action_server_topic: "/nao_raisim_ros/whole_body_control"
+zmp_topic: "/nao_raisim_ros/ZMP"
+
+#CoM Admittance Control Parameters
+enabled: False
+CoM_admittance_gain_x: 0.1
+CoM_admittance_gain_y: 0.05
+ZMP_proportional_gain_x: 0.5
+ZMP_proportional_gain_y: 0.5
+DCM_proportional_gain_x: 5.0
+DCM_proportional_gain_y: 5.0
+DCM_Integral_gain_x: 0
+DCM_Integral_gain_y: 0
+
+Linear_task_gain: 0.35
+Angular_task_gain: 0.2
+CoM_task_weight: 5.0e-1
+LLeg_task_weight: 2.0
+RLeg_task_weight: 2.0
+Torso_task_weight: 1.0e-3
+Head_task_weight: 5.0e-4
+LHand_task_weight: 5.0e-4
+RHand_task_weight: 5.0e-4
+DOF_weight: 5.0e-5
+DOF_gain: 0.6
