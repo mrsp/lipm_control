@@ -3,7 +3,7 @@
 LeakyIntegrator::LeakyIntegrator()
 {
   integral_.setZero();
-  rate_ = 0.1;
+  rate_ = 0.5;
   saturation_ = false;
 }
 void LeakyIntegrator::add(const Vector3d &value, double dt)

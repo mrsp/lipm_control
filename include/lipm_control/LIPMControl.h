@@ -40,8 +40,8 @@ public:
     Kdcm(0, 0) = 1.0 + Pdcm_x / omega;
     Kdcm(1, 1) = 1.0 + Pdcm_y / omega;
 
-    Kddcm(0, 0) = 15 / omega;
-    Kddcm(1, 1) = 15 / omega;
+    Kddcm(0, 0) = 1 / omega;
+    Kddcm(1, 1) = 1 / omega;
 
     Kidcm(0, 0) = Idcm_x / omega;
     Kidcm(1, 1) = Idcm_y / omega;
@@ -76,8 +76,8 @@ public:
     dDCM = computeDCM(dCoM, ddCoM);
 
     //Compute Command ZMP
-    //ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) - Kddcm * (dDCM_ref - dDCM) - Kidcm * sumDCM; 
-    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP); //- Kidcm * sumDCM;
+    //ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) - Kddcm * (dDCM_ref - dDCM); // - Kidcm * sumDCM; 
+    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP) - Kidcm * sumDCM;
     sumDCM += (DCM_ref - DCM) * dt;
     cout<<"Desired ZMP "<<ZMP_d.transpose()<< "CMD ZMP "<<ZMP_c.transpose()<<" Measured ZMP "<<ZMP.transpose()<<endl;
     // cout<<"Desired CoM "<<CoM_d.transpose()<<" Measured CoM "<<CoM.transpose()<< "Desired acc "<< ddCoM_d.transpose()<<endl;
