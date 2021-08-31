@@ -1,18 +1,17 @@
 #include <lipm_control/postureStabilizer.h>
 
-postureStabilizer::postureStabilizer(RobotParameters &robot_) : robot(robot_)
+postureStabilizer::postureStabilizer(double dt_, double Kc_, double Tc_, double Ka_, double Ta_, double Kn_, double Tn_) 
 {
-
     resetFootTorqueStabilizer();
     resetFootForceStabilizer();
     resetBaseOrientationStabilizer();
-    dt = robot.getWalkParameter(Ts);
-    Tc_ = robot.getWalkParameter(Tc);
-    Kc_ = robot.getWalkParameter(Kc);
-    Ta_ = robot.getWalkParameter(Ta);
-    Ka_ = robot.getWalkParameter(Ka);
-    Tn_ = robot.getWalkParameter(Tn);
-    Kn_ = robot.getWalkParameter(Kn);
+    dt = dt_;
+    Tc = Tc_;
+    Kc = Kc_;
+    Ta = Ta_;
+    Ka = Ka_;
+    Tn = Tn_;
+    Kn = Kn_;
     std::cout << "Real-time Posture Stabilizer Initialized Successfully" << std::endl;
 }
 
@@ -26,14 +25,13 @@ void postureStabilizer::resetFootTorqueStabilizer()
 
 void postureStabilizer::footTorqueStabilizer(Vector3d tauld, Vector3d taurd, Vector3d taul, Vector3d taur, bool right_contact, bool left_contact)
 {
-    Ta_ = robot.getWalkParameter(Ta);
-    Ka_ = robot.getWalkParameter(Ka);
-    dt = robot.getWalkParameter(Ts);
+
+
 
     if(left_contact)
     {
-        dL_Roll = Ka_ * dt * (tauld(0) - taul(0)) + (1.0 - dt / Ta_) * dL_Roll;
-        dL_Pitch = Ka_ * dt * (tauld(1) - taul(1)) + (1.0 - dt / Ta_) * dL_Pitch;
+        dL_Roll = Ka * dt * (tauld(0) - taul(0)) + (1.0 - dt / Ta) * dL_Roll;
+        dL_Pitch = Ka * dt * (tauld(1) - taul(1)) + (1.0 - dt / Ta) * dL_Pitch;
     }
     else
     {
@@ -42,14 +40,15 @@ void postureStabilizer::footTorqueStabilizer(Vector3d tauld, Vector3d taurd, Vec
     }
     if(right_contact)
     {
-        dR_Roll = Ka_ * dt * (taurd(0) - taur(0)) + (1.0 - dt / Ta_) * dR_Roll;
-        dR_Pitch = Ka_ * dt * (taurd(1) - taur(1)) + (1.0 - dt / Ta_) * dR_Pitch;
+        dR_Roll = Ka * dt * (taurd(0) - taur(0)) + (1.0 - dt / Ta) * dR_Roll;
+        dR_Pitch = Ka * dt * (taurd(1) - taur(1)) + (1.0 - dt / Ta) * dR_Pitch;
     }
     else
     {
         dR_Roll = 0.0;
         dR_Pitch = 0.0;
     }
+
 }
 
 void postureStabilizer::resetFootForceStabilizer()
@@ -59,14 +58,10 @@ void postureStabilizer::resetFootForceStabilizer()
 
 void postureStabilizer::footForceStabilizer(double flz, double frz, double flz_d, double frz_d)
 {
-    Tn_ = robot.getWalkParameter(Tn);
-    Kn_ = robot.getWalkParameter(Kn);
-    dt = robot.getWalkParameter(Ts);
     double deltaF = flz - frz;
     double deltaF_d = flz_d - frz_d;
 
-    dz = Kn_ * dt * (deltaF_d - deltaF) + (1.0 - dt / Tn_) * dz;
-
+    dz = Kn * dt * (deltaF_d - deltaF) + (1.0 - dt / Tn) * dz;
     dLz = -0.5 * dz;
     dRz = 0.5 * dz;
 }
@@ -79,14 +74,9 @@ void postureStabilizer::resetBaseOrientationStabilizer()
 
 void postureStabilizer::baseOrientationStabilizer(double base_Roll, double base_Pitch, double base_Roll_d, double base_Pitch_d)
 {
-    Vector3d dbase;
-    dbase.setZero();
-    Tc_ = robot.getWalkParameter(Tc);
-    Kc_ = robot.getWalkParameter(Kc);
-    dt = robot.getWalkParameter(Ts);
 
-    dbase_Roll = Kc_ * dt * (base_Roll_d - base_Roll) + (1.0 - dt / Tc_) * dbase_Roll;
-    dbase_Pitch = Kc_ * dt * (base_Pitch_d - base_Pitch) + (1.0 - dt / Tc_) * dbase_Pitch;
+    dbase_Roll = Kc * dt * (base_Roll_d - base_Roll) + (1.0 - dt / Tc) * dbase_Roll;
+    dbase_Pitch = Kc * dt * (base_Pitch_d - base_Pitch) + (1.0 - dt / Tc) * dbase_Pitch;
 
 }
 
@@ -107,12 +97,12 @@ Vector3d postureStabilizer::getRightFootOrientation()
     return Vector3d(dR_Roll, dR_Pitch, 0);
 }
 
-double postureStabilizer::getRightFootVerticalPosition()
+Vector3d postureStabilizer::getRightFootVerticalPosition()
 {
-    return dRz;
+    return Vector3d(0,0,dRz);
 }
 
-double postureStabilizer::getLeftFootVerticalPosition()
+Vector3d postureStabilizer::getLeftFootVerticalPosition()
 {
-    return dLz;
+    return Vector3d(0,0,dLz);
 }

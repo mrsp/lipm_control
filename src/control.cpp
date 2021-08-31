@@ -7,15 +7,22 @@ control::control(ros::NodeHandle nh_)
 {
     nh = nh_;
     ros::NodeHandle n_p("~");
-    double g, hc, dt;
+    double g, hc, mass;
     double Pcom_x, Pcom_y, Pzmp_x, Pzmp_y, Pdcm_x, Pdcm_y, Idcm_x, Idcm_y;
     n_p.param<double>("gravity", g, 9.80665);
     n_p.param<double>("hc", hc, 0.268);
+    n_p.param<double>("mass", mass, 5.14);
+
     n_p.param<double>("control_frequency", freq, 100);
     n_p.param<std::string>("joint_state_topic", joint_state_topic, "/nao_raisim_ros/joint_states");
     n_p.param<std::string>("com_topic", com_topic, "/nao_raisim_ros/CoM");
     n_p.param<std::string>("odom_topic", odom_topic, "/nao_raisim_ros/odom");
     n_p.param<std::string>("zmp_topic", zmp_topic, "/nao_raisim_ros/ZMP");
+    n_p.param<std::string>("wrenchLLeg_topic", wrenchLLeg_topic, "/nao_raisim_ros/LLeg/force_torque_states");
+    n_p.param<std::string>("wrenchRLeg_topic", wrenchRLeg_topic, "/nao_raisim_ros/RLeg/force_torque_states");
+    n_p.param<std::string>("LLegodom_topic", LLegodom_topic, "/nao_raisim_ros/LLeg/odom");
+    n_p.param<std::string>("RLegodom_topic", RLegodom_topic, "/nao_raisim_ros/RLeg/odom");
+    n_p.param<std::string>("gait_phase_topic", gait_phase_topic, "/nao_raisim_ros/gait_phase");
 
     //Load the CoM Admittance Control Parameters
     n_p.param<double>("CoM_admittance_gain_x", Pcom_x, 0.01);
@@ -29,7 +36,7 @@ control::control(ros::NodeHandle nh_)
     n_p.param<bool>("enabled", CoM_Ad_enabled, false);
 
     //Load the WBC Parameters
-    double CoM_task_weight, LLeg_task_weight, RLeg_task_weight, LHand_task_weight, RHand_task_weight,Head_task_weight, Torso_task_weight, DOF_weight, DOF_gain;
+    double CoM_task_weight, LLeg_task_weight, RLeg_task_weight, LHand_task_weight, RHand_task_weight, Head_task_weight, Torso_task_weight, DOF_weight, DOF_gain;
     n_p.param<double>("Linear_task_gain", Gain, 0.35);
     n_p.param<double>("Angular_task_gain", QGain, 0.15);
     n_p.param<double>("CoM_task_weight", CoM_task_weight, 1e-1);
@@ -61,7 +68,15 @@ control::control(ros::NodeHandle nh_)
 
     //CoM Admittance Control Module
     lc = new LIPMControl(hc, 1.0 / freq, Pcom_x, Pcom_y, Pzmp_x, Pzmp_y, Pdcm_x, Pdcm_y, Idcm_x, Idcm_y);
+    zd = new ZMPDistributor(mass, g);
 
+    double Tc = 0;
+    double Kc = 0;
+    double Ta = 0.01;
+    double Ka = 0.0;
+    double Tn = 0;
+    double Kn = 0;
+    ps = new postureStabilizer(1.0/freq, Kc, Tc, Ka, Ta, Kn, Tn);
     //NAO WBC Module
     nao_whole_body_control = new nao_wbc(nh);
 
@@ -76,6 +91,14 @@ control::control(ros::NodeHandle nh_)
     odom_sub = nh.subscribe(odom_topic, 1000, &control::odomCb, this);
     zmp_sub = nh.subscribe(zmp_topic, 1000, &control::ZMPCb, this);
     com_sub = nh.subscribe(com_topic, 1000, &control::CoMCb, this);
+    
+    wrenchLLeg_sub = nh.subscribe(wrenchLLeg_topic, 1000, &control::wrenchLLegCb, this);
+    wrenchRLeg_sub = nh.subscribe(wrenchRLeg_topic, 1000, &control::wrenchRLegCb, this);
+    
+    LLegodom_sub = nh.subscribe(LLegodom_topic, 1000, &control::LLegodomCb, this);
+    RLegodom_sub = nh.subscribe(RLegodom_topic, 1000, &control::RLegodomCb, this);
+    gait_phase_sub = nh.subscribe(gait_phase_topic, 1000, &control::gaitPhaseCb, this);
+
     joint_state_sub = nh.subscribe(joint_state_topic, 1000, &control::jointStateCb, this);
     desiredTrajectoryAvailable = false;
     as_ = new actionlib::SimpleActionServer<lipm_msgs::MotionControlAction>(nh, "lipm_control/plan", boost::bind(&control::desiredTrajectoryCb, this, _1), false);
@@ -86,7 +109,10 @@ control::control(ros::NodeHandle nh_)
     qd = jointNominalConfig;
     dqd = jointNominalVelocity;
     eop = false;
-
+    right_support = false;
+    double_support = false;
+    right_contact = false;
+    left_contact = false;
     cout << "LIPM Control Module Initialized " << endl;
 }
 void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal)
@@ -115,12 +141,67 @@ void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &go
     }
 }
 
-void control::odomCb(const nav_msgs::OdometryConstPtr &msg)
+
+
+
+void control::gaitPhaseCb(const std_msgs::StringConstPtr &msg)
 {
-    odom_msg = *msg;
-    odom_data.push(msg);
-    if (odom_data.size() > (int)freq / 20)
-        odom_data.pop();
+    gait_phase_data.push(msg);
+    if (gait_phase_data.size() > (int)freq / 20)
+        gait_phase_data.pop();
+}
+
+void control::gaitPhase(const std_msgs::StringConstPtr &msg)
+{
+    double_support = false;
+    right_support = false;
+    left_contact = false;
+    right_contact = false;
+
+    if (msg->data.compare("double_support") == 0)
+    {
+        double_support = true;
+        left_contact = true;
+        right_contact = true;
+    }
+    else if (msg->data.compare("left_support") == 0)
+    {
+        left_contact = true;
+    }
+    else if (msg->data.compare("right_support") == 0)
+    {
+        right_contact = true;
+        right_support = true;
+    }
+
+
+}
+
+void control::wrenchLLegCb(const geometry_msgs::WrenchStampedConstPtr &msg)
+{
+    wrenchLLeg_data.push(msg);
+    if (wrenchLLeg_data.size() > (int)freq / 20)
+        wrenchLLeg_data.pop();
+}
+
+void control::wrenchRLegCb(const geometry_msgs::WrenchStampedConstPtr &msg)
+{
+    wrenchRLeg_data.push(msg);
+    if (wrenchRLeg_data.size() > (int)freq / 20)
+        wrenchRLeg_data.pop();
+}
+
+void control::wrenchLLeg(const geometry_msgs::WrenchStampedConstPtr &msg)
+{
+    wrenchLLeg_msg = *msg;
+    LLeg_GRF = Vector3d(wrenchLLeg_msg.wrench.force.x, wrenchLLeg_msg.wrench.force.y, wrenchLLeg_msg.wrench.force.z);
+    LLeg_GRT = Vector3d(wrenchLLeg_msg.wrench.torque.x, wrenchLLeg_msg.wrench.torque.y, wrenchLLeg_msg.wrench.torque.z);
+}
+void control::wrenchRLeg(const geometry_msgs::WrenchStampedConstPtr &msg)
+{
+    wrenchRLeg_msg = *msg;
+    RLeg_GRF = Vector3d(wrenchRLeg_msg.wrench.force.x, wrenchRLeg_msg.wrench.force.y, wrenchRLeg_msg.wrench.force.z);
+    RLeg_GRT = Vector3d(wrenchRLeg_msg.wrench.torque.x, wrenchRLeg_msg.wrench.torque.y, wrenchRLeg_msg.wrench.torque.z);
 }
 
 void control::CoMCb(const nav_msgs::OdometryConstPtr &msg)
@@ -147,7 +228,21 @@ void control::ZMPCb(const geometry_msgs::PointStampedConstPtr &msg)
 void control::joints(const sensor_msgs::JointStateConstPtr &msg)
 {
     joint_state_msg = *msg;
+    std::vector<double> pos_vector = joint_state_msg.position;
+    double *pos_array = pos_vector.data();
+    q = Eigen::Map<Eigen::Matrix<double, 26, 1>>(pos_array);
 }
+
+
+
+
+void control::odomCb(const nav_msgs::OdometryConstPtr &msg)
+{
+    odom_data.push(msg);
+    if (odom_data.size() > (int)freq / 20)
+        odom_data.pop();
+}
+
 
 void control::odom(const nav_msgs::OdometryConstPtr &msg)
 {
@@ -159,6 +254,40 @@ void control::odom(const nav_msgs::OdometryConstPtr &msg)
     omegawb = Vector3d(msg->twist.twist.angular.x, msg->twist.twist.angular.y, msg->twist.twist.angular.z);
     odom_msg = *msg;
 }
+
+
+void control::LLegodomCb(const nav_msgs::OdometryConstPtr &msg)
+{
+    LLegodom_data.push(msg);
+    if (LLegodom_data.size() > (int)freq / 20)
+        LLegodom_data.pop();
+}
+
+
+void control::LLegodom(const nav_msgs::OdometryConstPtr &msg)
+{
+    pwl = Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    qwl = Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z);
+    Twl.linear() = qwl.toRotationMatrix();
+    Twl.translation() = pwl;
+}
+
+void control::RLegodomCb(const nav_msgs::OdometryConstPtr &msg)
+{
+    RLegodom_data.push(msg);
+    if (RLegodom_data.size() > (int)freq / 20)
+        RLegodom_data.pop();
+}
+
+
+void control::RLegodom(const nav_msgs::OdometryConstPtr &msg)
+{
+    pwr = Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    qwr = Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z);
+    Twr.linear() = qwr.toRotationMatrix();
+    Twr.translation() = pwr;
+}
+
 
 void control::com(const nav_msgs::OdometryConstPtr &msg)
 {
@@ -188,17 +317,22 @@ void control::run()
 
     while (ros::ok())
     {
-        if (odom_data.size() > 0 && com_data.size() > 0 && joint_data.size() > 0 && zmp_data.size() > 0)
+        if (odom_data.size() > 0 && com_data.size() > 0 && joint_data.size() > 0 && zmp_data.size() > 0 && wrenchRLeg_data.size() > 0 && wrenchLLeg_data.size() > 0 && LLegodom_data.size()>0  && RLegodom_data.size()>0 && gait_phase_data.size()>0)
         {
 
+            wrenchLLeg(wrenchLLeg_data.pop());
+            wrenchRLeg(wrenchRLeg_data.pop());
             joints(joint_data.pop());
             odom(odom_data.pop());
             com(com_data.pop());
             zmp(zmp_data.pop());
-
+            LLegodom(LLegodom_data.pop());
+            RLegodom(RLegodom_data.pop());
+            gaitPhase(gait_phase_data.pop());
             if (desiredTrajectoryAvailable && i < trajectorySize)
             {
                 //Go To Walk Mode
+                ZMP_ref = Eigen::Vector3d(VRPTrajectory.positions[i].x, VRPTrajectory.positions[i].y, VRPTrajectory.positions[i].z);
                 CoM_ref = Eigen::Vector3d(CoMTrajectory.positions[i].x, CoMTrajectory.positions[i].y, CoMTrajectory.positions[i].z);
                 vCoM_ref = Eigen::Vector3d(CoMTrajectory.linear_velocities[i].x, CoMTrajectory.linear_velocities[i].y, CoMTrajectory.linear_velocities[i].z);
                 aCoM_ref = Eigen::Vector3d(CoMTrajectory.linear_accelerations[i].x, CoMTrajectory.linear_accelerations[i].y, CoMTrajectory.linear_accelerations[i].z);
@@ -213,10 +347,15 @@ void control::run()
             }
             else
             {
-                //Go To Balance Mode and respect Joint Space Continuity 
+                //Go To Balance Mode and respect Joint Space Continuity
                 if (eop)
                 {
-                    jointNominalConfig = qd;
+                    jointNominalConfig.head(3) = pwb;
+                    jointNominalConfig(3) = qwb.w();
+                    jointNominalConfig(4) = qwb.x();
+                    jointNominalConfig(5) = qwb.y();
+                    jointNominalConfig(6) = qwb.z();
+                    jointNominalConfig.tail(26) = q;
                     eop = false;
                 }
                 nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
@@ -225,6 +364,8 @@ void control::run()
                 CoM_ref = nao_whole_body_control->desired_pin->comPosition();
                 vCoM_ref = Eigen::Vector3d(0, 0, 0);
                 aCoM_ref = Eigen::Vector3d(0, 0, 0);
+                ZMP_ref = CoM_ref;
+                ZMP_ref(2) = ZMP(2);
                 lf_pos_ref = nao_whole_body_control->getDesiredLLegPosition();
                 rf_pos_ref = nao_whole_body_control->getDesiredRLegPosition();
                 lf_orient_ref = nao_whole_body_control->getDesiredLLegOrientation();
@@ -233,19 +374,29 @@ void control::run()
                 desiredTrajectoryAvailable = false;
             }
 
-
             humanoidGoal_.odom = odom_msg;
             humanoidGoal_.joint_state = joint_state_msg;
 
             //Define Tasks for Whole Body Control
             Eigen::Vector3d tempC = CoM_ref, tempV = vCoM_ref;
-            if(CoM_Ad_enabled)
+            if (CoM_Ad_enabled)
             {
                 lc->Control(ZMP, CoM, vCoM, aCoM, CoM_ref, vCoM_ref, aCoM_ref);
                 tempC = lc->getDesiredCoMPosition();
                 tempV = lc->getDesiredCoMVelocity();
-
             }
+            zd->computeDistribution(ZMP, LLeg_GRF,  RLeg_GRF,  pwl,  pwr,  right_support,  double_support);
+            ps->footTorqueStabilizer(zd->tauld, zd->taurd, LLeg_GRT, RLeg_GRT, right_contact, left_contact);
+
+            Vector3d RLeg_rpy = ps->getRightFootOrientation();
+            Vector3d LLeg_rpy = ps->getLeftFootOrientation();
+
+            Eigen::Quaterniond qrr = Eigen::AngleAxisd(RLeg_rpy(0), Eigen::Vector3d::UnitX())*Eigen::AngleAxisd(RLeg_rpy(1), Eigen::Vector3d::UnitY())*Eigen::AngleAxisd(RLeg_rpy(2), Eigen::Vector3d::UnitZ());
+            Eigen::Quaterniond qll = Eigen::AngleAxisd(LLeg_rpy(0), Eigen::Vector3d::UnitX())*Eigen::AngleAxisd(LLeg_rpy(1), Eigen::Vector3d::UnitY())*Eigen::AngleAxisd(LLeg_rpy(2), Eigen::Vector3d::UnitZ());
+
+            //lf_orient_ref = lf_orient_ref * qll;
+            //rf_orient_ref = rf_orient_ref * qrr;
+
             humanoidGoal_.CoM.linear_task.desired_position.x = tempC(0);
             humanoidGoal_.CoM.linear_task.desired_position.y = tempC(1);
             humanoidGoal_.CoM.linear_task.desired_position.z = tempC(2);
@@ -302,7 +453,7 @@ void control::run()
                 humanoidGoal_.Joints[j].name = joint_state_msg.name[j];
                 j++;
             }
-            nao_whole_body_control->controlCb(qd,dqd, humanoidGoal_);
+            nao_whole_body_control->controlCb(qd, dqd, humanoidGoal_);
         }
         // auto stop = high_resolution_clock::now();
         // auto duration = duration_cast<microseconds>(stop - start);

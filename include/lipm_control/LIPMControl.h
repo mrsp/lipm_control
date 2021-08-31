@@ -1,12 +1,14 @@
+#include <lipm_control/LeakyIntegrator.h>
+
 class LIPMControl
 {
   Vector3d CoM_c, dCoM_c, ddCoM_c, dCoM_c_;
   Vector3d dCoM_d_, ZMP_d, ZMP_c;
   Vector3d DCM_ref, dDCM_ref, DCM, dDCM;
-  Vector3d sumDCM;
+  Vector3d sumDCM, sumZMP, sumZMP2, ZMPFeedback;
+  LeakyIntegrator liZMP, liZMP2;
   double  g, h, dt;
   bool initialized;
-
 public:
   Matrix3d Kzmp, Kdcm, Kcom, Kddcm, Kidcm;
   double omega;
@@ -24,7 +26,10 @@ public:
     Kidcm.setZero();
     Kddcm.setZero();
     sumDCM.setZero();
+    sumZMP.setZero();
+    sumZMP2.setZero();
 
+    ZMPFeedback.setZero();
 
     Kzmp(0, 0) = Pzmp_x / omega;
     Kzmp(1, 1) = Pzmp_y / omega;
@@ -55,6 +60,8 @@ public:
     {
       CoM_c = CoM_d;
       dCoM_c = dCoM_d;
+      ddCoM_c = ddCoM_d;
+
       initialized = true;
       return;
     }
@@ -70,19 +77,27 @@ public:
 
     //Compute Command ZMP
     //ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) - Kddcm * (dDCM_ref - dDCM) - Kidcm * sumDCM; 
-    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP) - Kidcm * sumDCM;
+    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP); //- Kidcm * sumDCM;
     sumDCM += (DCM_ref - DCM) * dt;
-    // cout<<"Desired ZMP "<<ZMP_d.transpose()<< "CMD ZMP "<<ZMP_c.transpose()<<" Measured ZMP "<<ZMP.transpose()<<endl;
+    cout<<"Desired ZMP "<<ZMP_d.transpose()<< "CMD ZMP "<<ZMP_c.transpose()<<" Measured ZMP "<<ZMP.transpose()<<endl;
     // cout<<"Desired CoM "<<CoM_d.transpose()<<" Measured CoM "<<CoM.transpose()<< "Desired acc "<< ddCoM_d.transpose()<<endl;
 
     //Compute Command CoM
-    dCoM_c = dCoM_d - Kcom * (ZMP_c - ZMP);
-    ddCoM_c = (dCoM_c - dCoM_c_) / dt;
-    dCoM_c_ = dCoM_c;
+    ZMPFeedback = Kcom*(ZMP - ZMP_c);
 
-    CoM_c = CoM_d + dCoM_c * dt;
-    // cout<<"Command CoM "<<CoM_c.transpose()<<" Measured CoM "<<CoM.transpose()<<endl;
-    // cout<<"Desired DCM "<<DCM_ref.transpose()<<" Measured DCM "<<DCM.transpose()<<endl;
+    dCoM_c = dCoM_d + ZMPFeedback;
+    ddCoM_c = (dCoM_c-dCoM_c_)/dt;
+    dCoM_c_ = dCoM_c;
+    liZMP.add(ZMPFeedback,dt);
+    //liZMP2.add(liZMP.eval(),dt);
+
+
+    CoM_c = liZMP.eval() + CoM_d;
+    //CoM_c = liZMP2.eval() + CoM_d;
+
+
+    cout<<"Command CoM "<<CoM_c.transpose()<<" Measured CoM "<<CoM.transpose()<<endl;
+    cout<<"Desired DCM "<<DCM_ref.transpose()<<" Measured DCM "<<DCM.transpose()<<endl;
   }
 
   Vector3d computeDCM(Vector3d CoM, Vector3d dCoM)

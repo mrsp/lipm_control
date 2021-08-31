@@ -42,11 +42,11 @@ include_directories(
   )
   link_directories(${PINOCCHIO_LIBRARY_DIRS})
 
-add_library(lipm_control src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
+add_library(lipm_control src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp src/LeakyIntegrator.cpp)
 add_dependencies(lipm_control ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lipm_control ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})
 
 
-add_executable(lipm_control_node src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp)
+add_executable(lipm_control_node src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp src/LeakyIntegrator.cpp)
 add_dependencies(lipm_control_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lipm_control_node ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})
