@@ -356,13 +356,13 @@ void control::run()
                 //Go To Balance Mode and respect Joint Space Continuity
                 if (eop)
                 {
-                    // jointNominalConfig.head(3) = pwb;
-                    // jointNominalConfig(3) = qwb.w();
-                    // jointNominalConfig(4) = qwb.x();
-                    // jointNominalConfig(5) = qwb.y();
-                    // jointNominalConfig(6) = qwb.z();
-                    // jointNominalConfig.tail(26) = q;
-                    jointNominalConfig = qd;
+                    jointNominalConfig.head(3) = pwb;
+                    jointNominalConfig(3) = qwb.w();
+                    jointNominalConfig(4) = qwb.x();
+                    jointNominalConfig(5) = qwb.y();
+                    jointNominalConfig(6) = qwb.z();
+                    jointNominalConfig.tail(26) = q;
+                    //jointNominalConfig = qd;
                     eop = false;
                 }
                 nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
@@ -376,8 +376,11 @@ void control::run()
                 ZMP_ref(2) = ZMP(2);
                 lf_pos_ref = nao_whole_body_control->getDesiredLLegPosition();
                 rf_pos_ref = nao_whole_body_control->getDesiredRLegPosition();
+
+
                 lf_orient_ref = nao_whole_body_control->getDesiredLLegOrientation();
                 rf_orient_ref = nao_whole_body_control->getDesiredRLegOrientation();
+
                 lf_vel_ref.setZero();
                 rf_vel_ref.setZero();
                 lf_ang_ref.setZero();
@@ -386,7 +389,6 @@ void control::run()
                 i = 0;
                 desiredTrajectoryAvailable = false;
             }
-
             humanoidGoal_.odom = odom_msg;
             humanoidGoal_.joint_state = joint_state_msg;
 
