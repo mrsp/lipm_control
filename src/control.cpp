@@ -340,6 +340,12 @@ void control::run()
                 lf_pos_ref = Eigen::Vector3d(LLegTrajectory.positions[i].x, LLegTrajectory.positions[i].y, LLegTrajectory.positions[i].z);
                 lf_orient_ref = Eigen::Quaterniond(LLegTrajectory.orientations[i].w, LLegTrajectory.orientations[i].x, LLegTrajectory.orientations[i].y, LLegTrajectory.orientations[i].z);
                 rf_orient_ref = Eigen::Quaterniond(RLegTrajectory.orientations[i].w, RLegTrajectory.orientations[i].x, RLegTrajectory.orientations[i].y, RLegTrajectory.orientations[i].z);
+                lf_vel_ref = Eigen::Vector3d(LLegTrajectory.linear_velocities[i].x, LLegTrajectory.linear_velocities[i].y, LLegTrajectory.linear_velocities[i].z);
+                rf_vel_ref = Eigen::Vector3d(RLegTrajectory.linear_velocities[i].x, RLegTrajectory.linear_velocities[i].y, RLegTrajectory.linear_velocities[i].z);
+                lf_ang_ref = Eigen::Vector3d(LLegTrajectory.angular_velocities[i].x, LLegTrajectory.angular_velocities[i].y, LLegTrajectory.angular_velocities[i].z);
+                rf_ang_ref = Eigen::Vector3d(RLegTrajectory.angular_velocities[i].x, RLegTrajectory.angular_velocities[i].y, RLegTrajectory.angular_velocities[i].z);
+
+
                 i++;
                 //Check if the end of plan (eop) is reached
                 if (i == trajectorySize)
@@ -363,14 +369,20 @@ void control::run()
                 nao_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
                 nao_whole_body_control->desired_pin->updateJointConfig(joint_state_msg.name, jointNominalConfig.tail(26), jointNominalVelocity.tail(26));
                 CoM_ref = nao_whole_body_control->desired_pin->comPosition();
-                vCoM_ref = Eigen::Vector3d(0, 0, 0);
-                aCoM_ref = Eigen::Vector3d(0, 0, 0);
+                vCoM_ref.setZero();
+                aCoM_ref.setZero();
+
                 ZMP_ref = CoM_ref;
                 ZMP_ref(2) = ZMP(2);
                 lf_pos_ref = nao_whole_body_control->getDesiredLLegPosition();
                 rf_pos_ref = nao_whole_body_control->getDesiredRLegPosition();
                 lf_orient_ref = nao_whole_body_control->getDesiredLLegOrientation();
                 rf_orient_ref = nao_whole_body_control->getDesiredRLegOrientation();
+                lf_vel_ref.setZero();
+                rf_vel_ref.setZero();
+                lf_ang_ref.setZero();
+                rf_ang_ref.setZero();
+
                 i = 0;
                 desiredTrajectoryAvailable = false;
             }
@@ -409,28 +421,28 @@ void control::run()
             humanoidGoal_.LLeg.linear_task.desired_position.y = lf_pos_ref(1);
             humanoidGoal_.LLeg.linear_task.desired_position.z = lf_pos_ref(2);
 
-            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.x = 0;
-            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.y = 0;
-            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.z = 0;
+            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.x = lf_vel_ref(0);
+            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.y = lf_vel_ref(1);
+            humanoidGoal_.LLeg.linear_task.desired_linear_velocity.z = lf_vel_ref(2);
             humanoidGoal_.LLeg.angular_task.desired_orientation.x = lf_orient_ref.x();
             humanoidGoal_.LLeg.angular_task.desired_orientation.y = lf_orient_ref.y();
             humanoidGoal_.LLeg.angular_task.desired_orientation.z = lf_orient_ref.z();
             humanoidGoal_.LLeg.angular_task.desired_orientation.w = lf_orient_ref.w();
-            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.x = 0;
-            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.y = 0;
-            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.z = 0;
+            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.x = lf_ang_ref(0);
+            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.y = lf_ang_ref(1);
+            humanoidGoal_.LLeg.angular_task.desired_angular_velocity.z = lf_ang_ref(2);
 
             //RLeg Desired Trajectories
             humanoidGoal_.RLeg.linear_task.desired_position.x = rf_pos_ref(0);
             humanoidGoal_.RLeg.linear_task.desired_position.y = rf_pos_ref(1);
             humanoidGoal_.RLeg.linear_task.desired_position.z = rf_pos_ref(2);
 
-            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.x = 0;
-            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.y = 0;
-            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.z = 0;
-            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.x = 0;
-            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.y = 0;
-            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.z = 0;
+            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.x = rf_vel_ref(0);
+            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.y = rf_vel_ref(1);
+            humanoidGoal_.RLeg.linear_task.desired_linear_velocity.z = rf_vel_ref(2);
+            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.x = rf_ang_ref(0);
+            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.y = rf_ang_ref(1);
+            humanoidGoal_.RLeg.angular_task.desired_angular_velocity.z = rf_ang_ref(2);
             humanoidGoal_.RLeg.angular_task.desired_orientation.x = rf_orient_ref.x();
             humanoidGoal_.RLeg.angular_task.desired_orientation.y = rf_orient_ref.y();
             humanoidGoal_.RLeg.angular_task.desired_orientation.z = rf_orient_ref.z();

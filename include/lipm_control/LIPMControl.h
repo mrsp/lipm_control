@@ -77,9 +77,9 @@ public:
 
     //Compute Command ZMP
     //ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) - Kddcm * (dDCM_ref - dDCM); // - Kidcm * sumDCM; 
-    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP) - Kidcm * sumDCM;
+    ZMP_c = ZMP_d - Kdcm * (DCM_ref - DCM) + Kzmp  * (ZMP_d - ZMP)  - Kidcm * sumDCM;
     sumDCM += (DCM_ref - DCM) * dt;
-    cout<<"Desired ZMP "<<ZMP_d.transpose()<< "CMD ZMP "<<ZMP_c.transpose()<<" Measured ZMP "<<ZMP.transpose()<<endl;
+    //cout<<"Desired ZMP "<<ZMP_d.transpose()<< "CMD ZMP "<<ZMP_c.transpose()<<" Measured ZMP "<<ZMP.transpose()<<endl;
     // cout<<"Desired CoM "<<CoM_d.transpose()<<" Measured CoM "<<CoM.transpose()<< "Desired acc "<< ddCoM_d.transpose()<<endl;
 
     //Compute Command CoM
@@ -96,8 +96,8 @@ public:
     //CoM_c = liZMP2.eval() + CoM_d;
 
 
-    cout<<"Command CoM "<<CoM_c.transpose()<<" Measured CoM "<<CoM.transpose()<<endl;
-    cout<<"Desired DCM "<<DCM_ref.transpose()<<" Measured DCM "<<DCM.transpose()<<endl;
+    // cout<<"Command CoM "<<CoM_c.transpose()<<" Measured CoM "<<CoM.transpose()<<endl;
+    // cout<<"Desired DCM "<<DCM_ref.transpose()<<" Measured DCM "<<DCM.transpose()<<endl;
   }
 
   Vector3d computeDCM(Vector3d CoM, Vector3d dCoM)

@@ -9,9 +9,9 @@ zmp_topic: "/nao_raisim_ros/ZMP"
 modelname: "/home/master/catkin_ws/src/whole_body_ik/share/urdf/nao.urdf"
 
 #CoM Admittance Control Parameters
-enabled: True
-CoM_admittance_gain_x: 0.05
-CoM_admittance_gain_y: 0.01
+enabled: False
+CoM_admittance_gain_x: 0.02
+CoM_admittance_gain_y: 0.02
 ZMP_proportional_gain_x: 0.5
 ZMP_proportional_gain_y: 0.5
 DCM_proportional_gain_x: 1.5
@@ -19,14 +19,14 @@ DCM_proportional_gain_y: 1.5
 DCM_Integral_gain_x: 5
 DCM_Integral_gain_y: 5
 
-Linear_task_gain: 0.25
-Angular_task_gain: 0.25
-CoM_task_weight: 0.5
-LLeg_task_weight: 5.0
-RLeg_task_weight: 5.0
-Torso_task_weight: 5.0e-3
+Linear_task_gain: 5.0
+Angular_task_gain: 2.0
+CoM_task_weight: 1.0
+LLeg_task_weight: 5
+RLeg_task_weight: 5
+Torso_task_weight: 1.0e-3
 Head_task_weight: 5.0e-4
 LHand_task_weight: 5.0e-4
 RHand_task_weight: 5.0e-4
 DOF_weight: 5.0e-5
-DOF_gain: 0.6
+DOF_gain: 0.05

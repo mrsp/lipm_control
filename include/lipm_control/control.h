@@ -35,7 +35,7 @@ private:
     bool init;
     Eigen::Affine3d Twb, Twl, Twr;
     Eigen::Quaterniond qwb, qwl, qwr, lf_orient_ref, rf_orient_ref, h_orient_ref, rh_orient_ref, lh_orient_ref;
-    Eigen::Vector3d pwb, pwl, pwr, CoM, vCoM, vCoM_, aCoM, CoM_ref, vCoM_ref, aCoM_ref, vwb, omegawb, ZMP, lf_pos_ref, rf_pos_ref, LLeg_GRF, RLeg_GRF, LLeg_GRT, RLeg_GRT, ZMP_ref;
+    Eigen::Vector3d pwb, pwl, pwr, CoM, vCoM, vCoM_, aCoM, CoM_ref, vCoM_ref, aCoM_ref, vwb, omegawb, ZMP, lf_pos_ref, rf_pos_ref, lf_vel_ref, rf_vel_ref, lf_ang_ref, rf_ang_ref, LLeg_GRF, RLeg_GRF, LLeg_GRT, RLeg_GRT, ZMP_ref;
     Eigen::VectorXd q;
     Queue<sensor_msgs::JointStateConstPtr> joint_data;
     Queue<nav_msgs::OdometryConstPtr> odom_data, com_data, LLegodom_data, RLegodom_data;
