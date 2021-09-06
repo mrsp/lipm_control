@@ -21,6 +21,25 @@
 using namespace Eigen;
 using namespace std;
 
+
+
+    /** @fn float anglemean(float l, float r) 
+     *  @brief Computation of mean angle
+     **/
+    
+    inline double anglemean(double l, double r) 
+    {
+        while(l < 0)
+            l += M_PI;
+        
+        while(r < 0)
+            r += M_PI;
+        double  angle = atan2(0.5* (sin(l)+sin(r)), 0.5*(cos(l)+cos(r)));
+  
+        return angle;
+    }
+
+
 class control
 {
 private:

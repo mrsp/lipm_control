@@ -356,13 +356,13 @@ void control::run()
                 //Go To Balance Mode and respect Joint Space Continuity
                 if (eop)
                 {
-                    jointNominalConfig.head(3) = pwb;
-                    jointNominalConfig(3) = qwb.w();
-                    jointNominalConfig(4) = qwb.x();
-                    jointNominalConfig(5) = qwb.y();
-                    jointNominalConfig(6) = qwb.z();
-                    jointNominalConfig.tail(26) = q;
-                    //jointNominalConfig = qd;
+                    // jointNominalConfig.head(3) = pwb;
+                    // jointNominalConfig(3) = qwb.w();
+                    // jointNominalConfig(4) = qwb.x();
+                    // jointNominalConfig(5) = qwb.y();
+                    // jointNominalConfig(6) = qwb.z();
+                    // jointNominalConfig.tail(26) = q;
+                    jointNominalConfig = qd;
                     eop = false;
                 }
                 nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
@@ -450,10 +450,16 @@ void control::run()
             humanoidGoal_.RLeg.angular_task.desired_orientation.z = rf_orient_ref.z();
             humanoidGoal_.RLeg.angular_task.desired_orientation.w = rf_orient_ref.w();
 
-            humanoidGoal_.Torso.angular_task.desired_orientation.x = 0;
-            humanoidGoal_.Torso.angular_task.desired_orientation.y = 0;
-            humanoidGoal_.Torso.angular_task.desired_orientation.z = 0;
-            humanoidGoal_.Torso.angular_task.desired_orientation.w = 1;
+
+            Quaterniond torso_orient_ref = rf_orient_ref.slerp(0.5,lf_orient_ref);
+            // Vector3d eulerTorso = torso_orient_ref.toRotationMatrix().eulerAngles(0, 1, 2);
+            // cout<<"euler "<<eulerTorso.transpose()<<endl;
+            //torso_orient_ref = AngleAxisd(0, Vector3d::UnitX()) * AngleAxisd(0, Vector3d::UnitY())* AngleAxisd(eulerTorso(2), Vector3d::UnitZ());
+            // cout<<"Torso "<<torso_orient_ref.x()<<" "<<torso_orient_ref.y()<<" "<<torso_orient_ref.z()<<" "<<torso_orient_ref.w()<<endl;
+            humanoidGoal_.Torso.angular_task.desired_orientation.x = torso_orient_ref.x();
+            humanoidGoal_.Torso.angular_task.desired_orientation.y = torso_orient_ref.y();
+            humanoidGoal_.Torso.angular_task.desired_orientation.z = torso_orient_ref.z();
+            humanoidGoal_.Torso.angular_task.desired_orientation.w = torso_orient_ref.w();
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.x = 0;
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.y = 0;
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.z = 0;
