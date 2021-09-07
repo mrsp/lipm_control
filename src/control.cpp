@@ -125,6 +125,8 @@ control::control(ros::NodeHandle nh_)
     right_contact = false;
     left_contact = false;
     initialized = false;
+    desiredTrajectoryAvailable = false;
+    i = 0;
     cout << "LIPM Control Module Initialized " << endl;
 }
 void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal)
@@ -388,8 +390,10 @@ void control::run()
                     jointNominalConfig(5) = qwb.y();
                     jointNominalConfig(6) = qwb.z();
                     //jointNominalConfig.tail(26) = q;
-                    //jointNominalConfig = qd;
+                    jointNominalConfig = qd;
                     eop = false;
+                    i = 0;
+                    desiredTrajectoryAvailable = false;
                 }
                 nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
                 nao_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
@@ -417,8 +421,7 @@ void control::run()
                 lf_ang_ref.setZero();
                 rf_ang_ref.setZero();
 
-                i = 0;
-                desiredTrajectoryAvailable = false;
+ 
             }
             humanoidGoal_.odom = odom_msg;
             humanoidGoal_.joint_state = joint_state_msg;
