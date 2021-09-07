@@ -63,6 +63,17 @@ control::control(ros::NodeHandle nh_)
     humanoidGoal_.RLeg.angular_task.gain = QGain;
     humanoidGoal_.Torso.angular_task.weight = Torso_task_weight;
     humanoidGoal_.Torso.angular_task.gain = QGain;
+
+    humanoidGoal_.Head.angular_task.weight = Head_task_weight;
+    humanoidGoal_.Head.angular_task.gain = QGain;
+
+    humanoidGoal_.LHand.angular_task.weight = LHand_task_weight;
+    humanoidGoal_.LHand.angular_task.gain = QGain;
+
+
+    humanoidGoal_.RHand.angular_task.weight = RHand_task_weight;
+    humanoidGoal_.RHand.angular_task.gain = QGain;
+
     dof_weight = DOF_weight;
     dof_gain = DOF_gain;
 
@@ -113,6 +124,7 @@ control::control(ros::NodeHandle nh_)
     double_support = false;
     right_contact = false;
     left_contact = false;
+    initialized = false;
     cout << "LIPM Control Module Initialized " << endl;
 }
 void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal)
@@ -253,6 +265,7 @@ void control::odom(const nav_msgs::OdometryConstPtr &msg)
     vwb = Vector3d(msg->twist.twist.linear.x, msg->twist.twist.linear.y, msg->twist.twist.linear.z);
     omegawb = Vector3d(msg->twist.twist.angular.x, msg->twist.twist.angular.y, msg->twist.twist.angular.z);
     odom_msg = *msg;
+
 }
 
 
@@ -320,6 +333,15 @@ void control::run()
         if (odom_data.size() > 0 && com_data.size() > 0 && joint_data.size() > 0 && zmp_data.size() > 0 && wrenchRLeg_data.size() > 0 && wrenchLLeg_data.size() > 0 && LLegodom_data.size()>0  && RLegodom_data.size()>0 && gait_phase_data.size()>0)
         {
 
+            if(!initialized)
+            {
+                jointNominalConfig.head(3) = pwb;
+                jointNominalConfig(3) = qwb.w();
+                jointNominalConfig(4) = qwb.x();
+                jointNominalConfig(5) = qwb.y();
+                jointNominalConfig(6) = qwb.z();
+                initialized = true;
+            }
             wrenchLLeg(wrenchLLeg_data.pop());
             wrenchRLeg(wrenchRLeg_data.pop());
             joints(joint_data.pop());
@@ -356,13 +378,13 @@ void control::run()
                 //Go To Balance Mode and respect Joint Space Continuity
                 if (eop)
                 {
-                    // jointNominalConfig.head(3) = pwb;
-                    // jointNominalConfig(3) = qwb.w();
-                    // jointNominalConfig(4) = qwb.x();
-                    // jointNominalConfig(5) = qwb.y();
-                    // jointNominalConfig(6) = qwb.z();
-                    // jointNominalConfig.tail(26) = q;
-                    jointNominalConfig = qd;
+                    jointNominalConfig.head(3) = pwb;
+                    jointNominalConfig(3) = qwb.w();
+                    jointNominalConfig(4) = qwb.x();
+                    jointNominalConfig(5) = qwb.y();
+                    jointNominalConfig(6) = qwb.z();
+                    //jointNominalConfig.tail(26) = q;
+                    //jointNominalConfig = qd;
                     eop = false;
                 }
                 nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
@@ -380,6 +402,11 @@ void control::run()
 
                 lf_orient_ref = nao_whole_body_control->getDesiredLLegOrientation();
                 rf_orient_ref = nao_whole_body_control->getDesiredRLegOrientation();
+
+                lh_orient_ref = nao_whole_body_control->getDesiredLHandOrientation();
+                rh_orient_ref = nao_whole_body_control->getDesiredRHandOrientation();
+                h_orient_ref = nao_whole_body_control->getDesiredHeadOrientation();
+
 
                 lf_vel_ref.setZero();
                 rf_vel_ref.setZero();
@@ -426,6 +453,7 @@ void control::run()
             humanoidGoal_.LLeg.linear_task.desired_linear_velocity.x = lf_vel_ref(0);
             humanoidGoal_.LLeg.linear_task.desired_linear_velocity.y = lf_vel_ref(1);
             humanoidGoal_.LLeg.linear_task.desired_linear_velocity.z = lf_vel_ref(2);
+
             humanoidGoal_.LLeg.angular_task.desired_orientation.x = lf_orient_ref.x();
             humanoidGoal_.LLeg.angular_task.desired_orientation.y = lf_orient_ref.y();
             humanoidGoal_.LLeg.angular_task.desired_orientation.z = lf_orient_ref.z();
@@ -452,10 +480,8 @@ void control::run()
 
 
             Quaterniond torso_orient_ref = rf_orient_ref.slerp(0.5,lf_orient_ref);
-            // Vector3d eulerTorso = torso_orient_ref.toRotationMatrix().eulerAngles(0, 1, 2);
-            // cout<<"euler "<<eulerTorso.transpose()<<endl;
-            //torso_orient_ref = AngleAxisd(0, Vector3d::UnitX()) * AngleAxisd(0, Vector3d::UnitY())* AngleAxisd(eulerTorso(2), Vector3d::UnitZ());
-            // cout<<"Torso "<<torso_orient_ref.x()<<" "<<torso_orient_ref.y()<<" "<<torso_orient_ref.z()<<" "<<torso_orient_ref.w()<<endl;
+
+
             humanoidGoal_.Torso.angular_task.desired_orientation.x = torso_orient_ref.x();
             humanoidGoal_.Torso.angular_task.desired_orientation.y = torso_orient_ref.y();
             humanoidGoal_.Torso.angular_task.desired_orientation.z = torso_orient_ref.z();
@@ -463,6 +489,35 @@ void control::run()
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.x = 0;
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.y = 0;
             humanoidGoal_.Torso.angular_task.desired_angular_velocity.z = 0;
+
+
+
+
+            // humanoidGoal_.Head.angular_task.desired_orientation.x = h_orient_ref.x();
+            // humanoidGoal_.Head.angular_task.desired_orientation.y = h_orient_ref.y();
+            // humanoidGoal_.Head.angular_task.desired_orientation.z = h_orient_ref.z();
+            // humanoidGoal_.Head.angular_task.desired_orientation.w = h_orient_ref.w();
+            // humanoidGoal_.Head.angular_task.desired_angular_velocity.x = 0;
+            // humanoidGoal_.Head.angular_task.desired_angular_velocity.y = 0;
+            // humanoidGoal_.Head.angular_task.desired_angular_velocity.z = 0;
+
+
+            // humanoidGoal_.LHand.angular_task.desired_orientation.x = lh_orient_ref.x();
+            // humanoidGoal_.LHand.angular_task.desired_orientation.y = lh_orient_ref.y();
+            // humanoidGoal_.LHand.angular_task.desired_orientation.z = lh_orient_ref.z();
+            // humanoidGoal_.LHand.angular_task.desired_orientation.w = lh_orient_ref.w();
+            // humanoidGoal_.LHand.angular_task.desired_angular_velocity.x = 0;
+            // humanoidGoal_.LHand.angular_task.desired_angular_velocity.y = 0;
+            // humanoidGoal_.LHand.angular_task.desired_angular_velocity.z = 0;
+
+
+            // humanoidGoal_.RHand.angular_task.desired_orientation.x = rh_orient_ref.x();
+            // humanoidGoal_.RHand.angular_task.desired_orientation.y = rh_orient_ref.y();
+            // humanoidGoal_.RHand.angular_task.desired_orientation.z = rh_orient_ref.z();
+            // humanoidGoal_.RHand.angular_task.desired_orientation.w = rh_orient_ref.w();
+            // humanoidGoal_.RHand.angular_task.desired_angular_velocity.x = 0;
+            // humanoidGoal_.RHand.angular_task.desired_angular_velocity.y = 0;
+            // humanoidGoal_.RHand.angular_task.desired_angular_velocity.z = 0;
 
             humanoidGoal_.Joints.resize(joint_state_msg.name.size());
             unsigned int j = 0;

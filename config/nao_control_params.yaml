@@ -19,14 +19,14 @@ DCM_proportional_gain_y: 1.5
 DCM_Integral_gain_x: 0
 DCM_Integral_gain_y: 0
 
-Linear_task_gain: 0.05 # 15 
-Angular_task_gain: 0.001 # 25.0 0.005
+Linear_task_gain: 0.15 # 15 
+Angular_task_gain: 0.05 # 25.0 0.005
 CoM_task_weight: 1.5
-LLeg_task_weight: 5.0
-RLeg_task_weight: 5.0
-Torso_task_weight: 5.0e-3
-Head_task_weight: 5.0e-4
-LHand_task_weight: 5.0e-4
-RHand_task_weight: 5.0e-4
-DOF_weight: 5.0e-5
-DOF_gain: 0.05 #0.25
+LLeg_task_weight: 15.0
+RLeg_task_weight: 15.0
+Torso_task_weight: 1.0e-2
+Head_task_weight: 1.0e-4
+LHand_task_weight: 1.0e-4
+RHand_task_weight: 1.0e-4
+DOF_weight: 5.0e-4
+DOF_gain: 0.5 #0.25
