@@ -355,18 +355,22 @@ void control::run()
             {
                 //Go To Walk Mode
                 ZMP_ref = Eigen::Vector3d(VRPTrajectory.positions[i].x, VRPTrajectory.positions[i].y, VRPTrajectory.positions[i].z);
+                
                 CoM_ref = Eigen::Vector3d(CoMTrajectory.positions[i].x, CoMTrajectory.positions[i].y, CoMTrajectory.positions[i].z);
                 vCoM_ref = Eigen::Vector3d(CoMTrajectory.linear_velocities[i].x, CoMTrajectory.linear_velocities[i].y, CoMTrajectory.linear_velocities[i].z);
                 aCoM_ref = Eigen::Vector3d(CoMTrajectory.linear_accelerations[i].x, CoMTrajectory.linear_accelerations[i].y, CoMTrajectory.linear_accelerations[i].z);
+                
                 rf_pos_ref = Eigen::Vector3d(RLegTrajectory.positions[i].x, RLegTrajectory.positions[i].y, RLegTrajectory.positions[i].z);
                 lf_pos_ref = Eigen::Vector3d(LLegTrajectory.positions[i].x, LLegTrajectory.positions[i].y, LLegTrajectory.positions[i].z);
+
                 lf_orient_ref = Eigen::Quaterniond(LLegTrajectory.orientations[i].w, LLegTrajectory.orientations[i].x, LLegTrajectory.orientations[i].y, LLegTrajectory.orientations[i].z);
                 rf_orient_ref = Eigen::Quaterniond(RLegTrajectory.orientations[i].w, RLegTrajectory.orientations[i].x, RLegTrajectory.orientations[i].y, RLegTrajectory.orientations[i].z);
+                
                 lf_vel_ref = Eigen::Vector3d(LLegTrajectory.linear_velocities[i].x, LLegTrajectory.linear_velocities[i].y, LLegTrajectory.linear_velocities[i].z);
                 rf_vel_ref = Eigen::Vector3d(RLegTrajectory.linear_velocities[i].x, RLegTrajectory.linear_velocities[i].y, RLegTrajectory.linear_velocities[i].z);
+                
                 lf_ang_ref = Eigen::Vector3d(LLegTrajectory.angular_velocities[i].x, LLegTrajectory.angular_velocities[i].y, LLegTrajectory.angular_velocities[i].z);
                 rf_ang_ref = Eigen::Vector3d(RLegTrajectory.angular_velocities[i].x, RLegTrajectory.angular_velocities[i].y, RLegTrajectory.angular_velocities[i].z);
-
 
                 i++;
                 //Check if the end of plan (eop) is reached
