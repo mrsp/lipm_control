@@ -21,7 +21,7 @@ DCM_Integral_gain_y: 0
 
 Linear_task_gain: 0.15 # 15 
 Angular_task_gain: 0.1 # 25.0 0.005
-CoM_task_weight: 1.5
+CoM_task_weight: 1.0
 LLeg_task_weight: 15.0
 RLeg_task_weight: 15.0
 Torso_task_weight: 1.0e-2
