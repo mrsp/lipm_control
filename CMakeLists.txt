@@ -40,11 +40,7 @@ include_directories(
   ${PINOCCHIO_INCLUDE_DIRS}
   ${qpmad_INCLUDE_DIRS}
   )
-  link_directories(${PINOCCHIO_LIBRARY_DIRS})
-
-add_library(lipm_control src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp src/LeakyIntegrator.cpp)
-add_dependencies(lipm_control ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lipm_control ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES} ${Boost_LIBRARIES})
+link_directories(${PINOCCHIO_LIBRARY_DIRS})
 
 
 add_executable(lipm_control_node src/main.cpp src/control.cpp src/RobotParameters.cpp src/postureStabilizer.cpp src/ZMPDistributor.cpp src/FootPolygon.cpp src/LeakyIntegrator.cpp)

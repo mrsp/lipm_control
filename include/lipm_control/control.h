@@ -12,6 +12,7 @@
 #include <sensor_msgs/JointState.h>
 #include "lipm_control/Queue.h"
 #include <whole_body_ik/nao_wbc.h>
+#include <whole_body_ik/atlas_wbc.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <std_msgs/String.h>
