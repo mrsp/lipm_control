@@ -88,8 +88,8 @@ control::control(ros::NodeHandle nh_)
     double Tn = 0;
     double Kn = 0;
     ps = new postureStabilizer(1.0/freq, Kc, Tc, Ka, Ta, Kn, Tn);
-    //NAO WBC Module
-    nao_whole_body_control = new nao_wbc(nh);
+    //Humanoid WBC Module
+    humanoid_whole_body_control = new humanoid_wbc(nh);
 
     //LIPM Control Parameters
     Twb = Eigen::Affine3d::Identity();
@@ -115,8 +115,8 @@ control::control(ros::NodeHandle nh_)
     as_ = new actionlib::SimpleActionServer<lipm_msgs::MotionControlAction>(nh, "lipm_control/plan", boost::bind(&control::desiredTrajectoryCb, this, _1), false);
     as_->start();
 
-    jointNominalConfig = nao_whole_body_control->jointNominalConfig;
-    jointNominalVelocity = nao_whole_body_control->jointNominalVelocity;
+    jointNominalConfig = humanoid_whole_body_control->jointNominalConfig;
+    jointNominalVelocity = humanoid_whole_body_control->jointNominalVelocity;
     qd = jointNominalConfig;
     dqd = jointNominalVelocity;
     eop = false;
@@ -243,8 +243,7 @@ void control::joints(const sensor_msgs::JointStateConstPtr &msg)
 {
     joint_state_msg = *msg;
     std::vector<double> pos_vector = joint_state_msg.position;
-    double *pos_array = pos_vector.data();
-    q = Eigen::Map<Eigen::Matrix<double, 26, 1>>(pos_array);
+    q = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1>>(pos_vector.data(), pos_vector.size());
 }
 
 
@@ -334,7 +333,6 @@ void control::run()
     {
         if (odom_data.size() > 0 && com_data.size() > 0 && joint_data.size() > 0 && zmp_data.size() > 0 && wrenchRLeg_data.size() > 0 && wrenchLLeg_data.size() > 0 && LLegodom_data.size()>0  && RLegodom_data.size()>0 && gait_phase_data.size()>0)
         {
-
             if(!initialized)
             {
                 jointNominalConfig.head(3) = pwb;
@@ -395,25 +393,25 @@ void control::run()
                     i = 0;
                     desiredTrajectoryAvailable = false;
                 }
-                nao_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
-                nao_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
-                nao_whole_body_control->desired_pin->updateJointConfig(joint_state_msg.name, jointNominalConfig.tail(26), jointNominalVelocity.tail(26));
-                CoM_ref = nao_whole_body_control->desired_pin->comPosition();
+                humanoid_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
+                humanoid_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
+                humanoid_whole_body_control->desired_pin->updateJointConfig(joint_state_msg.name, jointNominalConfig.tail(humanoid_whole_body_control->ndof), jointNominalVelocity.tail(humanoid_whole_body_control->ndof));
+                CoM_ref = humanoid_whole_body_control->desired_pin->comPosition();
                 vCoM_ref.setZero();
                 aCoM_ref.setZero();
 
                 ZMP_ref = CoM_ref;
                 ZMP_ref(2) = ZMP(2);
-                lf_pos_ref = nao_whole_body_control->getDesiredLLegPosition();
-                rf_pos_ref = nao_whole_body_control->getDesiredRLegPosition();
+                lf_pos_ref = humanoid_whole_body_control->getDesiredLLegPosition();
+                rf_pos_ref = humanoid_whole_body_control->getDesiredRLegPosition();
 
 
-                lf_orient_ref = nao_whole_body_control->getDesiredLLegOrientation();
-                rf_orient_ref = nao_whole_body_control->getDesiredRLegOrientation();
+                lf_orient_ref = humanoid_whole_body_control->getDesiredLLegOrientation();
+                rf_orient_ref = humanoid_whole_body_control->getDesiredRLegOrientation();
 
-                lh_orient_ref = nao_whole_body_control->getDesiredLHandOrientation();
-                rh_orient_ref = nao_whole_body_control->getDesiredRHandOrientation();
-                h_orient_ref = nao_whole_body_control->getDesiredHeadOrientation();
+                lh_orient_ref = humanoid_whole_body_control->getDesiredLHandOrientation();
+                rh_orient_ref = humanoid_whole_body_control->getDesiredRHandOrientation();
+                h_orient_ref = humanoid_whole_body_control->getDesiredHeadOrientation();
 
 
                 lf_vel_ref.setZero();
@@ -536,7 +534,7 @@ void control::run()
                 humanoidGoal_.Joints[j].name = joint_state_msg.name[j];
                 j++;
             }
-            nao_whole_body_control->controlCb(qd, dqd, humanoidGoal_);
+            humanoid_whole_body_control->controlCb(qd, dqd, humanoidGoal_);
         }
         // auto stop = high_resolution_clock::now();
         // auto duration = duration_cast<microseconds>(stop - start);

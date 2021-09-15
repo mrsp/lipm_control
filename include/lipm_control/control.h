@@ -11,8 +11,7 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/JointState.h>
 #include "lipm_control/Queue.h"
-#include <whole_body_ik/nao_wbc.h>
-#include <whole_body_ik/atlas_wbc.h>
+#include <whole_body_ik/humanoid_wbc.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <std_msgs/String.h>
@@ -63,7 +62,7 @@ private:
     geometry_msgs::WrenchStamped wrenchLLeg_msg, wrenchRLeg_msg;
     VectorXd jointNominalConfig, jointNominalVelocity, qd, dqd;
     std::string com_topic, odom_topic, joint_state_topic, action_server_topic, zmp_topic, wrenchRLeg_topic, wrenchLLeg_topic, LLegodom_topic, RLegodom_topic, gait_phase_topic;
-    nao_wbc *nao_whole_body_control;
+    humanoid_wbc *humanoid_whole_body_control;
     bool firstCoMVel, eop;
     double Gain;
     double QGain;

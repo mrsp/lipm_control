@@ -6,7 +6,11 @@ joint_state_topic: "/nao_raisim_ros/joint_states"
 com_topic: "/nao_raisim_ros/CoM"
 odom_topic: "/nao_raisim_ros/odom"
 zmp_topic: "/nao_raisim_ros/ZMP"
-modelname: "/home/master/catkin_ws/src/whole_body_ik/share/urdf/nao.urdf"
+wrenchLLeg_topic: "/nao_raisim_ros/LLeg/force_torque_states"
+wrenchRLeg_topic: "/nao_raisim_ros/RLeg/force_torque_states"
+LLegodom_topic: "/nao_raisim_ros/LLeg/odom"
+RLegodom_topic: "/nao_raisim_ros/RLeg/odom"
+gait_phase_topic: "/nao_raisim_ros/gait_phase"
 
 #CoM Admittance Control Parameters
 enabled: True

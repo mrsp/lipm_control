@@ -5,6 +5,7 @@
    	 <rosparam file="$(find lipm_motion)/config/nao_planning_params.yaml" command="load"/> 
 </node>
 <node pkg="lipm_control" type="lipm_control_node" name="lipm_control" respawn="false" output="screen" >
+   	 <rosparam file="$(find whole_body_ik)/config/nao_wbc_params.yaml" command="load"/> 
    	 <rosparam file="$(find lipm_control)/config/nao_control_params.yaml" command="load"/> 
 </node>
 </launch>

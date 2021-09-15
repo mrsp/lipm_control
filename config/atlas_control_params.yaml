@@ -6,8 +6,11 @@ joint_state_topic: "/atlas_raisim_ros/joint_states"
 com_topic: "/atlas_raisim_ros/CoM"
 odom_topic: "/atlas_raisim_ros/odom"
 zmp_topic: "/atlas_raisim_ros/ZMP"
-modelname: "/home/master/catkin_ws/src/whole_body_ik/share/urdf/nao.urdf"
-
+wrenchLLeg_topic: "/atlas_raisim_ros/LLeg/force_torque_states"
+wrenchRLeg_topic: "/atlas_raisim_ros/RLeg/force_torque_states"
+LLegodom_topic: "/atlas_raisim_ros/LLeg/odom"
+RLegodom_topic: "/atlas_raisim_ros/RLeg/odom"
+gait_phase_topic: "/atlas_raisim_ros/gait_phase"
 #CoM Admittance Control Parameters
 enabled: False
 CoM_admittance_gain_x: 0.1
@@ -19,14 +22,14 @@ DCM_proportional_gain_y: 1.5
 DCM_Integral_gain_x: 0
 DCM_Integral_gain_y: 0
 
-Linear_task_gain: 0.15 # 15 
-Angular_task_gain: 0.1 # 25.0 0.005
-CoM_task_weight: 1.0
-LLeg_task_weight: 15.0
-RLeg_task_weight: 15.0
-Torso_task_weight: 1.0e-2
+Linear_task_gain: 0.01 # 15 
+Angular_task_gain: 0.01 # 25.0 0.005
+CoM_task_weight: 1.0e-3
+LLeg_task_weight: 1.0
+RLeg_task_weight: 1.0
+Torso_task_weight: 5.0e-4
 Head_task_weight: 1.0e-4
 LHand_task_weight: 1.0e-4
 RHand_task_weight: 1.0e-4
-DOF_weight: 5.0e-4
-DOF_gain: 0.5 #0.25
+DOF_weight: 5.0e-5
+DOF_gain: 0.1 #0.25
