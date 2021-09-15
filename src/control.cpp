@@ -333,15 +333,7 @@ void control::run()
     {
         if (odom_data.size() > 0 && com_data.size() > 0 && joint_data.size() > 0 && zmp_data.size() > 0 && wrenchRLeg_data.size() > 0 && wrenchLLeg_data.size() > 0 && LLegodom_data.size()>0  && RLegodom_data.size()>0 && gait_phase_data.size()>0)
         {
-            if(!initialized)
-            {
-                jointNominalConfig.head(3) = pwb;
-                jointNominalConfig(3) = qwb.w();
-                jointNominalConfig(4) = qwb.x();
-                jointNominalConfig(5) = qwb.y();
-                jointNominalConfig(6) = qwb.z();
-                initialized = true;
-            }
+
             wrenchLLeg(wrenchLLeg_data.pop());
             wrenchRLeg(wrenchRLeg_data.pop());
             joints(joint_data.pop());
@@ -351,6 +343,15 @@ void control::run()
             LLegodom(LLegodom_data.pop());
             RLegodom(RLegodom_data.pop());
             gaitPhase(gait_phase_data.pop());
+            if(!initialized)
+            {
+                jointNominalConfig.head(3) = pwb;
+                jointNominalConfig(3) = qwb.w();
+                jointNominalConfig(4) = qwb.x();
+                jointNominalConfig(5) = qwb.y();
+                jointNominalConfig(6) = qwb.z();
+                initialized = true;
+            }
             if (desiredTrajectoryAvailable && i < trajectorySize)
             {
                 //Go To Walk Mode
@@ -399,7 +400,6 @@ void control::run()
                 CoM_ref = humanoid_whole_body_control->desired_pin->comPosition();
                 vCoM_ref.setZero();
                 aCoM_ref.setZero();
-
                 ZMP_ref = CoM_ref;
                 ZMP_ref(2) = ZMP(2);
                 lf_pos_ref = humanoid_whole_body_control->getDesiredLLegPosition();
