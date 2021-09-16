@@ -14,6 +14,7 @@ control::control(ros::NodeHandle nh_)
     n_p.param<double>("mass", mass, 5.14);
 
     n_p.param<double>("control_frequency", freq, 100);
+    n_p.param<double>("plan_frequency", plan_freq, 100);
     n_p.param<std::string>("joint_state_topic", joint_state_topic, "/nao_raisim_ros/joint_states");
     n_p.param<std::string>("com_topic", com_topic, "/nao_raisim_ros/CoM");
     n_p.param<std::string>("odom_topic", odom_topic, "/nao_raisim_ros/odom");
@@ -127,6 +128,7 @@ control::control(ros::NodeHandle nh_)
     initialized = false;
     desiredTrajectoryAvailable = false;
     i = 0;
+    j = 0;
     cout << "LIPM Control Module Initialized " << endl;
 }
 void control::desiredTrajectoryCb(const lipm_msgs::MotionControlGoalConstPtr &goal)
@@ -372,8 +374,16 @@ void control::run()
                 
                 lf_ang_ref = Eigen::Vector3d(LLegTrajectory.angular_velocities[i].x, LLegTrajectory.angular_velocities[i].y, LLegTrajectory.angular_velocities[i].z);
                 rf_ang_ref = Eigen::Vector3d(RLegTrajectory.angular_velocities[i].x, RLegTrajectory.angular_velocities[i].y, RLegTrajectory.angular_velocities[i].z);
-
-                i++;
+                
+                if( j >= (freq/plan_freq) - 1)
+                {
+                    i++;
+                    j = 0;
+                }
+                else
+                {
+                    j++;
+                }
                 //Check if the end of plan (eop) is reached
                 if (i == trajectorySize)
                     eop = true;

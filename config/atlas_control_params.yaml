@@ -2,6 +2,7 @@ hc: 1.1354
 gravity: 9.80665
 dt: 0.001
 control_frequency: 1000
+plan_frequency: 100
 joint_state_topic: "/atlas_raisim_ros/joint_states"
 com_topic: "/atlas_raisim_ros/CoM"
 odom_topic: "/atlas_raisim_ros/odom"
@@ -13,23 +14,23 @@ RLegodom_topic: "/atlas_raisim_ros/RLeg/odom"
 gait_phase_topic: "/atlas_raisim_ros/gait_phase"
 #CoM Admittance Control Parameters
 enabled: False
-CoM_admittance_gain_x: 0.1
-CoM_admittance_gain_y: 0.05
-ZMP_proportional_gain_x: 0.5
-ZMP_proportional_gain_y: 0.5
-DCM_proportional_gain_x: 1.5
-DCM_proportional_gain_y: 1.5
+CoM_admittance_gain_x: 0.2
+CoM_admittance_gain_y: 0.1
+ZMP_proportional_gain_x: 2.5
+ZMP_proportional_gain_y: 2.5
+DCM_proportional_gain_x: 10
+DCM_proportional_gain_y: 10
 DCM_Integral_gain_x: 0
 DCM_Integral_gain_y: 0
 
-Linear_task_gain: 0.025 # 15 
-Angular_task_gain: 0.025 # 25.0 0.005
-CoM_task_weight: 1.0e-1
+Linear_task_gain: 0.1
+Angular_task_gain: 0.05
+CoM_task_weight: 0.1
 LLeg_task_weight: 0.5
 RLeg_task_weight: 0.5
-Torso_task_weight: 5.0e-2
-Head_task_weight: 1.0e-4
-LHand_task_weight: 1.0e-4
-RHand_task_weight: 1.0e-4
+Torso_task_weight: 0.01
+Head_task_weight: 1.0e-2
+LHand_task_weight: 1.0e-2
+RHand_task_weight: 1.0e-2
 DOF_weight: 5.0e-5
-DOF_gain: 0.2 #0.25
+DOF_gain: 0.1 #0.25

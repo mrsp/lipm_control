@@ -38,8 +38,8 @@ class control
 private:
     /// ROS nodehanlder
     ros::NodeHandle nh;
-    double freq;
-    int trajectorySize, i;
+    double freq, plan_freq;
+    int trajectorySize, i, j;
     bool desiredTrajectoryAvailable;
     lipm_msgs::TrajectoryPoints CoMTrajectory, VRPTrajectory, DCMTrajectory, LLegTrajectory, RLegTrajectory;
     lipm_msgs::MotionControlResult result_;
