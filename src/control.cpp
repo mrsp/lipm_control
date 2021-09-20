@@ -393,13 +393,19 @@ void control::run()
                 //Go To Balance Mode and respect Joint Space Continuity
                 if (eop)
                 {
+                    // jointNominalConfig.head(3) = pwb;
+                    // jointNominalConfig(3) = qwb.w();
+                    // jointNominalConfig(4) = qwb.x();
+                    // jointNominalConfig(5) = qwb.y();
+                    // jointNominalConfig(6) = qwb.z();
+                    // jointNominalConfig.tail(26) = q;
+                    // jointNominalConfig = qd;
+                    jointNominalConfig = qd;
                     jointNominalConfig.head(3) = pwb;
                     jointNominalConfig(3) = qwb.w();
                     jointNominalConfig(4) = qwb.x();
                     jointNominalConfig(5) = qwb.y();
                     jointNominalConfig(6) = qwb.z();
-                    //jointNominalConfig.tail(26) = q;
-                    jointNominalConfig = qd;
                     eop = false;
                     i = 0;
                     desiredTrajectoryAvailable = false;
