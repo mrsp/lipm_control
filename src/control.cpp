@@ -401,11 +401,11 @@ void control::run()
                     // jointNominalConfig.tail(26) = q;
                     // jointNominalConfig = qd;
                     jointNominalConfig = qd;
-                    jointNominalConfig.head(3) = pwb;
-                    jointNominalConfig(3) = qwb.w();
-                    jointNominalConfig(4) = qwb.x();
-                    jointNominalConfig(5) = qwb.y();
-                    jointNominalConfig(6) = qwb.z();
+                    // jointNominalConfig.head(3) = pwb;
+                    // jointNominalConfig(3) = qwb.w();
+                    // jointNominalConfig(4) = qwb.x();
+                    // jointNominalConfig(5) = qwb.y();
+                    // jointNominalConfig(6) = qwb.z();
                     eop = false;
                     i = 0;
                     desiredTrajectoryAvailable = false;

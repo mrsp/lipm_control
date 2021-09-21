@@ -14,8 +14,8 @@ RLegodom_topic: "/atlas_raisim_ros/RLeg/odom"
 gait_phase_topic: "/atlas_raisim_ros/gait_phase"
 #CoM Admittance Control Parameters
 enabled: True
-CoM_admittance_gain_x: 1.1
-CoM_admittance_gain_y: 0.9
+CoM_admittance_gain_x: 0.8
+CoM_admittance_gain_y: 0.8
 ZMP_proportional_gain_x: 2.0
 ZMP_proportional_gain_y: 2.0
 DCM_proportional_gain_x: 7.0
@@ -25,12 +25,12 @@ DCM_Integral_gain_y: 0
 
 Linear_task_gain: 0.008
 Angular_task_gain: 0.008
-CoM_task_weight: 1.0
-LLeg_task_weight: 10.0
-RLeg_task_weight: 10.0
+CoM_task_weight: 1
+LLeg_task_weight: 5.0
+RLeg_task_weight: 5.0
 Torso_task_weight: 0.1
 Head_task_weight: 1.0e-2
 LHand_task_weight: 1.0e-2
 RHand_task_weight: 1.0e-2
 DOF_weight: 5.0e-3
-DOF_gain: 0.02
+DOF_gain: 0.015
