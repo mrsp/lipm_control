@@ -23,7 +23,7 @@ These instructions will get you a copy of the project up and running on your loc
 * roslaunch lipm_control lipm_control.launch
 
 ### Real-time Gait Control for NAO and Atlas humanoid robots
-[![YouTube Link](img/atlasWBC.png)  ](https://www.youtube.com/watch?v=NjRICIC1yZE)
+[![YouTube Link](img/NAO.png)  ](https://www.youtube.com/watch?v=DD0I0H3wR7c)
 
 ## License
 [BSD](LICENSE) 
