@@ -12,9 +12,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Installing
 * install https://github.com/mrsp/whole_body_ik.git
-* git clone https://github.com/mrsp/whole_body_ik_msgs.git
-* git clone https://github.com/mrsp/lipm_msgs.git
-* git clone https://github.com/mrsp/lipm_motion.git
+* install https://github.com/mrsp/lipm_motion.git
 * git clone https://github.com/mrsp/lipm_control.git
 * catkin_make -DCMAKE_BUILD_TYPE=Release 
 * If you are using catkin tools run: catkin build  --cmake-args -DCMAKE_BUILD_TYPE=Release 
