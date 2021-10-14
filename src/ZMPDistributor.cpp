@@ -14,7 +14,7 @@ ZMPDistributor::ZMPDistributor(double mass, double g)
     std::cout << "ZMP Distributor Initialized Successfully" << std::endl;
 }
 
-void ZMPDistributor::computeDistribution(Vector3d pZMPd, Vector3d fl, Vector3d fr, Vector3d pL, Vector3d pR, bool right_support, bool double_support)
+void ZMPDistributor::computeDistribution(Vector3d pZMPd, Vector3d pZMP, Vector3d pL, Vector3d pR, bool right_support, bool double_support)
 {
     tauld.setZero();
     taurd.setZero();
@@ -44,18 +44,18 @@ void ZMPDistributor::computeDistribution(Vector3d pZMPd, Vector3d fl, Vector3d f
     frd(2) = a * maxForceReadingR;
     fld(2) = (1.0 - a) * maxForceReadingL;
 
-    tau0 = -(pR - pZMPd).cross(frd) - (pL - pZMPd).cross(fld);
+    tau0 = -(pR - pZMP).cross(frd) - (pL - pZMP).cross(fld);
     taurd = a * tau0;
     tauld = (1 - a) * tau0;
-    // if(tau0(0)<0)
-    // {
-    //     taurd(0) = tau0(0);
-    //     tauld(0) = 0;
-    // }
-    // else
-    // {
-    //     tauld(0) = tau0(0);
-    //     taurd(0) = 0;
-    // }
+    if(tau0(0)<0)
+    {
+        taurd(0) = tau0(0);
+        tauld(0) = 0;
+    }
+    else
+    {
+        tauld(0) = tau0(0);
+        taurd(0) = 0;
+    }
 
 }

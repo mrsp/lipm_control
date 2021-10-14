@@ -84,10 +84,17 @@ control::control(ros::NodeHandle nh_)
 
     double Tc = 0;
     double Kc = 0;
-    double Ta = 0.01;
-    double Ka = 0.0;
+    double Ta = 0.001;
+    double Ka = 0.1;
     double Tn = 0;
     double Kn = 0;
+
+    n_p.param<double>("foot_damping_control_gain", Ka, 0.01);
+    n_p.param<double>("foot_damping_control_time_constant", Ta, 0.001);
+    n_p.param<double>("base_damping_control_gain", Kc, 0.01);
+    n_p.param<double>("base_damping_control_time_constant", Tc, 0.001);
+
+
     ps = new postureStabilizer(1.0/freq, Kc, Tc, Ka, Ta, Kn, Tn);
     //Humanoid WBC Module
     humanoid_whole_body_control = new humanoid_wbc(nh);
@@ -353,6 +360,35 @@ void control::run()
                 jointNominalConfig(5) = qwb.y();
                 jointNominalConfig(6) = qwb.z();
                 initialized = true;
+
+                humanoid_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
+                humanoid_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
+                humanoid_whole_body_control->desired_pin->updateJointConfig(joint_state_msg.name, jointNominalConfig.tail(humanoid_whole_body_control->ndof), jointNominalVelocity.tail(humanoid_whole_body_control->ndof));
+                CoM_ref = humanoid_whole_body_control->desired_pin->comPosition();
+                vCoM_ref.setZero();
+                aCoM_ref.setZero();
+                ZMP_ref = CoM_ref;
+                ZMP_ref(2) = ZMP(2);
+                lf_pos_ref = humanoid_whole_body_control->getDesiredLLegPosition();
+                rf_pos_ref = humanoid_whole_body_control->getDesiredRLegPosition();
+
+
+                lf_orient_ref = humanoid_whole_body_control->getDesiredLLegOrientation();
+                rf_orient_ref = humanoid_whole_body_control->getDesiredRLegOrientation();
+
+                lh_orient_ref = humanoid_whole_body_control->getDesiredLHandOrientation();
+                rh_orient_ref = humanoid_whole_body_control->getDesiredRHandOrientation();
+                h_orient_ref = humanoid_whole_body_control->getDesiredHeadOrientation();
+
+
+                lf_vel_ref.setZero();
+                rf_vel_ref.setZero();
+                lf_ang_ref.setZero();
+                rf_ang_ref.setZero();
+
+
+
+
             }
             if (desiredTrajectoryAvailable && i < trajectorySize)
             {
@@ -400,40 +436,16 @@ void control::run()
                     // jointNominalConfig(6) = qwb.z();
                     // jointNominalConfig.tail(26) = q;
                     // jointNominalConfig = qd;
-                    jointNominalConfig = qd;
-                    jointNominalConfig.head(3) = pwb;
-                    jointNominalConfig(3) = qwb.w();
-                    jointNominalConfig(4) = qwb.x();
-                    jointNominalConfig(5) = qwb.y();
-                    jointNominalConfig(6) = qwb.z();
+                    // jointNominalConfig = qd;
+                    // jointNominalConfig.head(3) = pwb;
+                    // jointNominalConfig(3) = qwb.w();
+                    // jointNominalConfig(4) = qwb.x();
+                    // jointNominalConfig(5) = qwb.y();
+                    // jointNominalConfig(6) = qwb.z();
                     eop = false;
                     i = 0;
                     desiredTrajectoryAvailable = false;
                 }
-                humanoid_whole_body_control->desired_pin->setBaseToWorldState(jointNominalConfig.head(3), Eigen::Quaterniond(jointNominalConfig(3), jointNominalConfig(4), jointNominalConfig(5), jointNominalConfig(6)));
-                humanoid_whole_body_control->desired_pin->setBaseWorldVelocity(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
-                humanoid_whole_body_control->desired_pin->updateJointConfig(joint_state_msg.name, jointNominalConfig.tail(humanoid_whole_body_control->ndof), jointNominalVelocity.tail(humanoid_whole_body_control->ndof));
-                CoM_ref = humanoid_whole_body_control->desired_pin->comPosition();
-                vCoM_ref.setZero();
-                aCoM_ref.setZero();
-                ZMP_ref = CoM_ref;
-                ZMP_ref(2) = ZMP(2);
-                lf_pos_ref = humanoid_whole_body_control->getDesiredLLegPosition();
-                rf_pos_ref = humanoid_whole_body_control->getDesiredRLegPosition();
-
-
-                lf_orient_ref = humanoid_whole_body_control->getDesiredLLegOrientation();
-                rf_orient_ref = humanoid_whole_body_control->getDesiredRLegOrientation();
-
-                lh_orient_ref = humanoid_whole_body_control->getDesiredLHandOrientation();
-                rh_orient_ref = humanoid_whole_body_control->getDesiredRHandOrientation();
-                h_orient_ref = humanoid_whole_body_control->getDesiredHeadOrientation();
-
-
-                lf_vel_ref.setZero();
-                rf_vel_ref.setZero();
-                lf_ang_ref.setZero();
-                rf_ang_ref.setZero();
 
  
             }
@@ -448,18 +460,25 @@ void control::run()
                 tempC = lc->getDesiredCoMPosition();
                 tempV = lc->getDesiredCoMVelocity();
             }
-            zd->computeDistribution(ZMP, LLeg_GRF,  RLeg_GRF,  pwl,  pwr,  right_support,  double_support);
+            zd->computeDistribution(ZMP_ref, ZMP,  pwl,  pwr,  right_support,  double_support);
             ps->footTorqueStabilizer(zd->tauld, zd->taurd, LLeg_GRT, RLeg_GRT, right_contact, left_contact);
 
-            Vector3d RLeg_rpy = ps->getRightFootOrientation();
-            Vector3d LLeg_rpy = ps->getLeftFootOrientation();
+            Eigen::Quaterniond qrr = ps->getRightFootOrientation();
+            Eigen::Quaterniond qll = ps->getLeftFootOrientation();
+            lf_orient_ref = lf_orient_ref * qll;
+            rf_orient_ref = rf_orient_ref * qrr;
+            Quaterniond torso_orient_ref = rf_orient_ref.slerp(0.5,lf_orient_ref);
 
-            Eigen::Quaterniond qrr = Eigen::AngleAxisd(RLeg_rpy(0), Eigen::Vector3d::UnitX())*Eigen::AngleAxisd(RLeg_rpy(1), Eigen::Vector3d::UnitY())*Eigen::AngleAxisd(RLeg_rpy(2), Eigen::Vector3d::UnitZ());
-            Eigen::Quaterniond qll = Eigen::AngleAxisd(LLeg_rpy(0), Eigen::Vector3d::UnitX())*Eigen::AngleAxisd(LLeg_rpy(1), Eigen::Vector3d::UnitY())*Eigen::AngleAxisd(LLeg_rpy(2), Eigen::Vector3d::UnitZ());
+            ps->baseOrientationStabilizer(qwb,torso_orient_ref);
+            torso_orient_ref = torso_orient_ref * ps->getBaseOrientation();
 
-            //lf_orient_ref = lf_orient_ref * qll;
-            //rf_orient_ref = rf_orient_ref * qrr;
 
+            std::cout<<"Leg Orientation REF"<<std::endl;
+            std::cout << lf_orient_ref.x()<<" "<<lf_orient_ref.y()<<" "<<lf_orient_ref.z()<<" "<<lf_orient_ref.w()<< std::endl;
+            std::cout << rf_orient_ref.x()<<" "<<rf_orient_ref.y()<<" "<<rf_orient_ref.z()<<" "<<rf_orient_ref.w()<< std::endl;
+            std::cout<<"Leg Orientation M"<<std::endl;
+            std::cout << qwl.x()<<" "<<qwl.y()<<" "<<qwl.z()<<" "<<qwl.w()<< std::endl;
+            std::cout << qwr.x()<<" "<<qwr.y()<<" "<<qwr.z()<<" "<<qwr.w()<< std::endl;
             humanoidGoal_.CoM.linear_task.desired_position.x = tempC(0);
             humanoidGoal_.CoM.linear_task.desired_position.y = tempC(1);
             humanoidGoal_.CoM.linear_task.desired_position.z = tempC(2);
@@ -500,7 +519,6 @@ void control::run()
             humanoidGoal_.RLeg.angular_task.desired_orientation.w = rf_orient_ref.w();
 
 
-            Quaterniond torso_orient_ref = rf_orient_ref.slerp(0.5,lf_orient_ref);
 
 
             humanoidGoal_.Torso.angular_task.desired_orientation.x = torso_orient_ref.x();

@@ -17,7 +17,7 @@ public:
     ZMPDistributor(double mass, double g);
     Vector3d frd, fld, tauld, taurd, tau0;
     double a;
-    void computeDistribution(Vector3d pZMPd,  Vector3d fl, Vector3d fr, Vector3d pL, Vector3d pR, bool right_support, bool double_support);
+    void computeDistribution(Vector3d pZMPd, Vector3d pZMP, Vector3d pL, Vector3d pR, bool right_support, bool double_support);
 
     Vector2d computePointLineIntersection(Vector2d point_, Vector2d linepoint0_, Vector2d linepoint1_)
     {   
