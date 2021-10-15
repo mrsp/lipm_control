@@ -473,12 +473,6 @@ void control::run()
             torso_orient_ref = torso_orient_ref * ps->getBaseOrientation();
 
 
-            std::cout<<"Leg Orientation REF"<<std::endl;
-            std::cout << lf_orient_ref.x()<<" "<<lf_orient_ref.y()<<" "<<lf_orient_ref.z()<<" "<<lf_orient_ref.w()<< std::endl;
-            std::cout << rf_orient_ref.x()<<" "<<rf_orient_ref.y()<<" "<<rf_orient_ref.z()<<" "<<rf_orient_ref.w()<< std::endl;
-            std::cout<<"Leg Orientation M"<<std::endl;
-            std::cout << qwl.x()<<" "<<qwl.y()<<" "<<qwl.z()<<" "<<qwl.w()<< std::endl;
-            std::cout << qwr.x()<<" "<<qwr.y()<<" "<<qwr.z()<<" "<<qwr.w()<< std::endl;
             humanoidGoal_.CoM.linear_task.desired_position.x = tempC(0);
             humanoidGoal_.CoM.linear_task.desired_position.y = tempC(1);
             humanoidGoal_.CoM.linear_task.desired_position.z = tempC(2);
