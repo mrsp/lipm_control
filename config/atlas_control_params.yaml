@@ -29,7 +29,7 @@ base_damping_control_gain: 0
 base_damping_control_time_constant: 0.001
 
 Linear_task_gain: 0.008
-Angular_task_gain: 0.03
+Angular_task_gain: 0.008
 CoM_task_weight: 1
 LLeg_task_weight: 5.0
 RLeg_task_weight: 5.0
