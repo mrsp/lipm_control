@@ -496,6 +496,11 @@ void control::run()
             humanoidGoal_.LLeg.angular_task.desired_angular_velocity.y = lf_ang_ref(1);
             humanoidGoal_.LLeg.angular_task.desired_angular_velocity.z = lf_ang_ref(2);
 
+            // cout<<"Reference Trajectories "<<endl;
+            // cout<<lf_pos_ref.transpose()<<endl;
+            // cout<<rf_pos_ref.transpose()<<endl;
+            // cout<<tempC.transpose()<<endl;
+
             //RLeg Desired Trajectories
             humanoidGoal_.RLeg.linear_task.desired_position.x = rf_pos_ref(0);
             humanoidGoal_.RLeg.linear_task.desired_position.y = rf_pos_ref(1);
