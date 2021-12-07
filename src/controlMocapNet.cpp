@@ -120,7 +120,7 @@ controlMocapNet::controlMocapNet(ros::NodeHandle nh_)
     gait_phase_sub = nh.subscribe(gait_phase_topic, 1000, &controlMocapNet::gaitPhaseCb, this);
 
     joint_state_sub = nh.subscribe(joint_state_topic, 1000, &controlMocapNet::jointStateCb, this);
-    joint_cmd_sub = nh.subscribe(joint_state_topic, 1000, &controlMocapNet::jointStateCb, this);
+    joint_cmd_sub = nh.subscribe(joint_cmd_topic, 1000, &controlMocapNet::jointCmdCb, this);
 
 
     jointNominalConfig = humanoid_whole_body_control->jointNominalConfig;

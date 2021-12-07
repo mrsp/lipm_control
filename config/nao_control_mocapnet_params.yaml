@@ -11,7 +11,7 @@ wrenchRLeg_topic: "/nao_raisim_ros/RLeg/force_torque_states"
 LLegodom_topic: "/nao_raisim_ros/LLeg/odom"
 RLegodom_topic: "/nao_raisim_ros/RLeg/odom"
 gait_phase_topic: "/nao_raisim_ros/gait_phase"
-joint_cmd_topic: "/mocapnet/joint_state"
+joint_cmd_topic: "/mocapnet/joint_states"
 #CoM Admittance Control Parameters
 enabled: True
 CoM_admittance_gain_x: 0.05
@@ -39,4 +39,4 @@ Head_task_weight: -1
 LHand_task_weight: -1
 RHand_task_weight: -1
 DOF_weight: 5.0e-5
-DOF_gain: 0.45 #0.25
+DOF_gain: 0.15 #0.25
