@@ -1,4 +1,4 @@
-hc: 1.1354
+hc: 0.915
 gravity: 9.80665
 dt: 0.0025
 control_frequency: 400
@@ -13,13 +13,13 @@ LLegodom_topic: "/digit_raisim_ros/LLeg/odom"
 RLegodom_topic: "/digit_raisim_ros/RLeg/odom"
 gait_phase_topic: "/digit_raisim_ros/gait_phase"
 #CoM Admittance Control Parameters
-enabled: True
-CoM_admittance_gain_x: 0.1
-CoM_admittance_gain_y: 0.1
-ZMP_proportional_gain_x: 1.0
-ZMP_proportional_gain_y: 1.0
-DCM_proportional_gain_x: 2.5
-DCM_proportional_gain_y: 2.5
+enabled: False
+CoM_admittance_gain_x: 0.01
+CoM_admittance_gain_y: 0.01
+ZMP_proportional_gain_x: 0.5
+ZMP_proportional_gain_y: 0.5
+DCM_proportional_gain_x: 1.0
+DCM_proportional_gain_y: 1.0
 DCM_Integral_gain_x: 0
 DCM_Integral_gain_y: 0
 
@@ -28,14 +28,14 @@ foot_damping_control_time_constant: 0.001
 base_damping_control_gain: 0
 base_damping_control_time_constant: 0.001
 
-Linear_task_gain: 0.008
-Angular_task_gain: 0.008
-CoM_task_weight: 1
-LLeg_task_weight: 5.0
-RLeg_task_weight: 5.0
-Torso_task_weight: 0.1
-Head_task_weight: 1.0e-2
-LHand_task_weight: 1.0e-2
-RHand_task_weight: 1.0e-2
-DOF_weight: 5.0e-3
-DOF_gain: 0.015
+Linear_task_gain: 0.00001
+Angular_task_gain: 0.000005
+CoM_task_weight: 0.5
+LLeg_task_weight: 1.0
+RLeg_task_weight: 1.0
+Torso_task_weight: 0.01
+Head_task_weight: -1
+LHand_task_weight: -1
+RHand_task_weight: -1
+DOF_weight: 5.0e-4
+DOF_gain: 0.00001
