@@ -30,12 +30,12 @@ base_damping_control_time_constant: 0.001
 
 Linear_task_gain: 0.1
 Angular_task_gain: 0.01
-CoM_task_weight: 1.0
-LLeg_task_weight: 5.0
-RLeg_task_weight: 5.0
-Torso_task_weight: 0.1
+CoM_task_weight: 0.5
+LLeg_task_weight: 1.0
+RLeg_task_weight: 1.0
+Torso_task_weight: 0.01
 Head_task_weight: -1
 LHand_task_weight: -1
 RHand_task_weight: -1
-DOF_weight: 1.0e-3
+DOF_weight: 5.0e-4
 DOF_gain: 0.01
