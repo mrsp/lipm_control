@@ -13,14 +13,14 @@ These instructions will get you a copy of the project up and running on your loc
 ## Installing
 * install https://github.com/mrsp/whole_body_ik.git
 * install https://github.com/mrsp/lipm_motion.git
-* git clone https://github.com/mrsp/lipm_control.git
-* catkin_make -DCMAKE_BUILD_TYPE=Release 
-* If you are using catkin tools run: catkin build  --cmake-args -DCMAKE_BUILD_TYPE=Release 
+* `git clone https://github.com/mrsp/lipm_control.git`
+* `catkin_make -DCMAKE_BUILD_TYPE=Release` 
+* If you are using catkin tools run: `catkin build  --cmake-args -DCMAKE_BUILD_TYPE=Release` 
 
 ## ROS Examples
 ### Launch on your Robot 
-* Specify topics on config/humanoid_control_params.yaml
-* roslaunch lipm_control lipm_control.launch
+* Specify topics on `config/humanoid_control_params.yaml`
+* `roslaunch lipm_control lipm_control.launch`
 
 ### Real-time Gait Control for NAO and Atlas humanoid robots
 [![YouTube Link](img/NAO.png)  ](https://www.youtube.com/watch?v=DD0I0H3wR7c)
